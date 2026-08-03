@@ -36,8 +36,7 @@ export default function PlanPage() {
 
   return (
     <main className="flex-1">
-      <AppHeader title="Plán" subtitle="14. – 24. augusta 2026" />
-
+        <AppHeader title="Plán" subtitle="15. – 24. augusta 2026" />
       <div className="space-y-3 px-4 py-4">
         <Card className="p-4">
           <p className="eyebrow mb-3">Časová os</p>
