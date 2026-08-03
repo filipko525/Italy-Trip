@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Paleta:
+  piesok #FAF5EC / more #0E6B75 / lagúna #2FB3AE
+  nočná cesta #0A1A21 / značenie (amber) #E8952F
+*/
+:root {
+  --c-bg: 250 245 236;
+  --c-surface: 255 253 249;
+  --c-raised: 244 237 225;
+  --c-line: 223 212 195;
+  --c-ink: 12 38 46;
+  --c-muted: 96 116 122;
+  --c-sea: 14 107 117;
+  --c-lagoon: 26 146 143;
+  --c-sand: 232 214 184;
+  --c-signal: 200 118 24;
+  --c-danger: 178 48 44;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --c-bg: 8 22 28;
+  --c-surface: 14 35 43;
+  --c-raised: 20 48 58;
+  --c-line: 33 68 79;
+  --c-ink: 226 240 240;
+  --c-muted: 141 165 170;
+  --c-sea: 47 179 174;
+  --c-lagoon: 88 205 197;
+  --c-sand: 214 189 148;
+  --c-signal: 240 163 60;
+  --c-danger: 233 108 100;
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: rgb(var(--c-bg));
+  color: rgb(var(--c-ink));
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Číselné údaje (km, litre, €) musia byť čitateľné za jazdy => tabuľkové číslice. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Značkový štítok – vychádza z dopravného značenia. */
+.eyebrow {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: rgb(var(--c-muted));
+}
+
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid rgb(var(--c-signal));
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Mapbox – tmavšie ovládanie, aby neprekrývalo naše UI */
+.mapboxgl-ctrl-logo {
+  opacity: 0.6;
+}
