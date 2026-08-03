@@ -8,7 +8,7 @@ export const TRIP = {
   subtitle: 'Lignano 2026',
   travelers: 2,
   pet: 'Sumi',
-  departureDate: '2026-08-14',
+  departureDate: '2026-08-15
   arrivalHomeDate: '2026-08-24',
   stayFrom: '2026-08-14',
   stayTo: '2026-08-23',
