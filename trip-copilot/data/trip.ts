@@ -28,8 +28,7 @@ export const CAR = {
 
 export const BUDGET = {
   /** Predbežný celkový rozpočet – uprav v nastaveniach. */
-  totalEur: 1200,
-  fuelEurFrom: 180,
+    totalEur: 800,  fuelEurFrom: 180,
   fuelEurTo: 190,
   fuelLitersFrom: 90,
   fuelLitersTo: 100,
