@@ -314,4 +314,6 @@ export interface AppState {
   petLog: PetLog;
   travel: TravelState;
   accommodationNotes: Record<string, string>;
+  /** Ručné úpravy dátumu/času položiek plánu – kľúč je PlanItem.id. */
+  planOverrides: Record<string, { date?: string; time?: string }>;
 }
