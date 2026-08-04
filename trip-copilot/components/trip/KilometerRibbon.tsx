@@ -69,7 +69,22 @@ export function KilometerRibbon({
 
   const pct = (km: number) => `${Math.max(0, Math.min(100, (km / route.distanceKm) * 100))}%`;
   const ticks = Array.from({ length: Math.floor(route.distanceKm / 50) }, (_, i) => (i + 1) * 50);
-  const labelled = marks.filter((m) => m.border || m.name.length < 22);
+
+  /* Popisky sa vedia zraziť, keď je bodov na trase veľa. Namiesto vypísania
+     všetkých necháme len toľko, koľko sa naozaj zmestí bez prekrytia –
+     hranice majú prednosť, ostatné se pridajú, len ak je dosť miesta od
+     posledného zobrazeného popisku. */
+  const MIN_GAP_PCT = 9;
+  const candidates = marks.filter((m) => m.border || m.name.length < 22);
+  const labelled: Mark[] = [];
+  let lastShownPct = -Infinity;
+  candidates.forEach((mark) => {
+    const p = (mark.km / route.distanceKm) * 100;
+    if (mark.border || p - lastShownPct >= MIN_GAP_PCT) {
+      labelled.push(mark);
+      lastShownPct = p;
+    }
+  });
 
   return (
     <div className="select-none">
