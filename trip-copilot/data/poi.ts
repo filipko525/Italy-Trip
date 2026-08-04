@@ -592,7 +592,7 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     detourMinutes: 5,
     stopMinutes: 15,
     catFriendly: true,
-    note: 'Na natankovanie pred cestou domov 23. 8.',
+    note: 'Na natankovanie pred cestou domov 22. 8.',
   }),
   poi({
     id: 'li-2',
