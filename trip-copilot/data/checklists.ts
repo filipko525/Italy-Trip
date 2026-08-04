@@ -27,7 +27,7 @@ export const CHECKLISTS: Checklist[] = [
   {
     id: 'cl-return',
     title: 'Checklist pred návratom',
-    description: 'Ráno 23. 8. pred checkoutom o 10:00.',
+    description: 'Ráno 22. 8. pred checkoutom o 9:00.',
     items: [
       { id: 'r-1', label: 'Prehľadané všetky zásuvky a skrine' },
       { id: 'r-2', label: 'Nabíjačky a adaptéry zbalené' },
@@ -36,7 +36,7 @@ export const CHECKLISTS: Checklist[] = [
       { id: 'r-5', label: 'Balkón, kúpeľňa, terasa skontrolované' },
       { id: 'r-6', label: 'Kľúče odovzdané' },
       { id: 'r-7', label: 'Natankované pred cestou' },
-      { id: 'r-8', label: 'Rakúska jednodňová známka na 24. 8. kúpená' },
+      { id: 'r-8', label: 'Rakúska jednodňová známka na 23. 8. kúpená' },
       { id: 'r-9', label: 'Voda a jedlo do auta' },
       { id: 'r-10', label: 'Ubytovanie v Rakúsku potvrdené a adresa v telefóne' },
     ],
@@ -61,9 +61,9 @@ export const CHECKLISTS: Checklist[] = [
 export const CONTACTS = [
   { id: 'k-1', label: 'Tiesňová linka (EU)', value: '112', note: 'Platí v SK, AT aj IT' },
   { id: 'k-2', label: 'Asistenčná služba poisťovne', value: 'doplniť', note: 'Číslo z poistnej zmluvy' },
-  { id: 'k-3', label: 'Yachting Residence', value: 'doplniť', note: 'Z potvrdenia rezervácie' },
+  { id: 'k-3', label: 'Yachting Residence', value: '+39 334 908 5534', note: 'Delegátka Mária Matiščíková' },
   { id: 'k-4', label: 'Ubytovanie v Rakúsku', value: 'doplniť', note: 'Po výbere ubytovania' },
   { id: 'k-5', label: 'Náš veterinár doma', value: 'doplniť' },
-  { id: 'k-6', label: 'Veterina v Lignane', value: 'doplniť', note: 'Nájsť po príchode' },
+  { id: 'k-6', label: 'Veterina v Lignane', value: 'doplniť', note: 'Nájspť po príchode' },
   { id: 'k-7', label: 'Blokovanie kariet', value: 'doplniť', note: 'Číslo banky' },
 ];
