@@ -316,4 +316,12 @@ export interface AppState {
   accommodationNotes: Record<string, string>;
   /** Ručné úpravy dátumu/času položiek plánu – kľúč je PlanItem.id. */
   planOverrides: Record<string, { date?: string; time?: string }>;
+  /** Ručne doplnené údaje o Sumi (číslo čipu, pasu...) a jej fotka (base64). */
+  petProfileOverrides: {
+    chipNumber?: string;
+    passportNumber?: string;
+    rabiesValidUntil?: string;
+    vetPhone?: string;
+    photoDataUrl?: string;
+  };
 }
