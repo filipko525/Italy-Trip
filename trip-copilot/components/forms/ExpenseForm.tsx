@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Camera, Loader2 } from 'lucide-react';
 import type { CountryCode, ExpenseCategory } from '@/types';
 import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_LABELS } from '@/lib/calculations/costs';
 import { COUNTRY_LABELS } from '@/data/trip';
@@ -25,6 +26,50 @@ export function ExpenseForm({
   const [country, setCountry] = useState<CountryCode>('SK');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanNote, setScanNote] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const fileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // "data:image/jpeg;base64,AAAA..." -> len časť za čiarkou
+        resolve(result.split(',')[1] ?? '');
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const scanReceipt = async (file: File) => {
+    setScanning(true);
+    setScanNote(null);
+    setError(null);
+    try {
+      const base64 = await fileToBase64(file);
+      const res = await fetch('/api/scan-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mediaType: file.type || 'image/jpeg' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setScanNote(data.error ?? 'Bloček sa nepodarilo prečítať – zadaj sumu ručne.');
+        return;
+      }
+      if (data.amount === null || data.amount === undefined) {
+        setScanNote('Sumu se z fotky nepodarilo s istotou prečítať – skontroluj a doplň ručne.');
+        return;
+      }
+      setAmount(String(data.amount).replace('.', ','));
+      setScanNote(`Suma prečítaná z bločku: ${data.amount} € – over si ju pred uložením.`);
+    } catch {
+      setScanNote('Bloček sa nepodarilo prečítať (chyba pripojenia) – zadaj sumu ručne.');
+    } finally {
+      setScanning(false);
+    }
+  };
 
   const submit = () => {
     const value = Number(amount.replace(',', '.'));
@@ -46,6 +91,29 @@ export function ExpenseForm({
 
   return (
     <div className="space-y-3">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) scanReceipt(file);
+          e.target.value = '';
+        }}
+      />
+      <Button
+        variant="secondary"
+        full
+        disabled={scanning}
+        icon={scanning ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {scanning ? 'Čítam bloček…' : 'Odfotiť bloček a vyplniť sumu'}
+      </Button>
+      {scanNote ? <p className="text-sm text-muted">{scanNote}</p> : null}
+
       <div className="grid grid-cols-2 gap-3">
         <TextField label="Dátum" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         <TextField
