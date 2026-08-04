@@ -146,7 +146,7 @@ export default function HomePage() {
             icon={<BedDouble size={18} />}
             eyebrow="Rakúsky nocľah"
             title={austria.name}
-            detail="23. – 24. 8., Graz alebo okolie, do 100 €"
+            detail="22. – 23. 8., Graz alebo okolie, do 100 €"
             warn="doplniť"
           />
           <HomeCard
