@@ -11,6 +11,9 @@ import { SelectField, TextAreaField, TextField } from '@/components/ui/Field';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+/** Vypnuté, kým nie je nastavený ANTHROPIC_API_KEY vo Verceli. Zapneš zmenou na `true`. */
+const RECEIPT_SCAN_ENABLED = false;
+
 export function ExpenseForm({
   onDone,
   defaultCategory = 'jedlo',
@@ -91,28 +94,32 @@ export function ExpenseForm({
 
   return (
     <div className="space-y-3">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) scanReceipt(file);
-          e.target.value = '';
-        }}
-      />
-      <Button
-        variant="secondary"
-        full
-        disabled={scanning}
-        icon={scanning ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        {scanning ? 'Čítam bloček…' : 'Odfotiť bloček a vyplniť sumu'}
-      </Button>
-      {scanNote ? <p className="text-sm text-muted">{scanNote}</p> : null}
+      {RECEIPT_SCAN_ENABLED ? (
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) scanReceipt(file);
+              e.target.value = '';
+            }}
+          />
+          <Button
+            variant="secondary"
+            full
+            disabled={scanning}
+            icon={scanning ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {scanning ? 'Čítam bloček…' : 'Odfotiť bloček a vyplniť sumu'}
+          </Button>
+          {scanNote ? <p className="text-sm text-muted">{scanNote}</p> : null}
+        </>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3">
         <TextField label="Dátum" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
