@@ -27,7 +27,7 @@ interface PointDef {
 }
 
 const TAM_POINTS: PointDef[] = [
-  { coords: [17.5872, 48.3774], country: 'SK', name: 'Trnava', note: 'Štart – 14. 8. 2026' },
+  { coords: [17.5872, 48.3774], country: 'SK', name: 'Trnava', note: 'Štart – 15. 8. 2026' },
   { coords: [17.3922, 48.3134], country: 'SK' },
   { coords: [17.2011, 48.2123], country: 'SK' },
   { coords: [17.1077, 48.1486], country: 'SK', name: 'Bratislava', note: 'Obchvat D4 / D2' },
@@ -56,11 +56,11 @@ const TAM_POINTS: PointDef[] = [
   { coords: [13.18, 45.9], country: 'IT', note: 'A23 → A4' },
   { coords: [13.0022, 45.7736], country: 'IT', name: 'Latisana', note: 'Výjazd z A4, platba mýta' },
   { coords: [13.06, 45.71], country: 'IT' },
-  { coords: [13.13, 45.6789], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Yachting Residence' },
+  { coords: [13.1448582, 45.6967665], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Yachting Residence' },
 ];
 
 const SPAT_1_POINTS: PointDef[] = [
-  { coords: [13.13, 45.6789], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Checkout 23. 8. 2026 o 10:00' },
+  { coords: [13.1448582, 45.6967665], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Checkout 22. 8. 2026 o 9:00' },
   { coords: [13.06, 45.71], country: 'IT' },
   { coords: [13.0022, 45.7736], country: 'IT', name: 'Latisana', note: 'Nájazd na A4, lístok pri vstupe' },
   { coords: [13.18, 45.9], country: 'IT' },
@@ -75,11 +75,11 @@ const SPAT_1_POINTS: PointDef[] = [
   { coords: [14.84, 46.84], country: 'AT', name: 'Wolfsberg' },
   { coords: [15.03, 46.92], country: 'AT', name: 'Pack / Packsattel' },
   { coords: [15.23, 46.98], country: 'AT' },
-  { coords: [15.4395, 47.0707], country: 'AT', name: 'Graz alebo okolie', note: 'Nocľah 23. – 24. 8. 2026' },
+  { coords: [15.4395, 47.0707], country: 'AT', name: 'Graz alebo okolie', note: 'Nocľah 22. – 23. 8. 2026' },
 ];
 
 const SPAT_2_POINTS: PointDef[] = [
-  { coords: [15.4395, 47.0707], country: 'AT', name: 'Graz alebo okolie', note: 'Odchod 24. 8. 2026' },
+  { coords: [15.4395, 47.0707], country: 'AT', name: 'Graz alebo okolie', note: 'Odchod 23. 8. 2026' },
   { coords: [15.71, 47.1], country: 'AT' },
   { coords: [15.97, 47.28], country: 'AT', name: 'Hartberg' },
   { coords: [15.98, 47.42], country: 'AT' },
@@ -172,7 +172,7 @@ export const CESTA_SPAT: Route = (() => {
       to: 'Graz alebo okolie',
       distanceKm: 395,
       drivingMinutes: 250,
-      description: 'Checkout o 10:00, prejazd cez Tarvisio a Klagenfurt do okolia Grazu na jednu noc.',
+      description: 'Checkout o 9:00, prejazd cez Tarvisio a Klagenfurt do okolia Grazu na jednu noc.',
     },
     SPAT_1_POINTS,
   );
@@ -187,7 +187,7 @@ export const CESTA_SPAT: Route = (() => {
       to: 'Trnava',
       distanceKm: 285,
       drivingMinutes: 175,
-      description: 'Posledný úsek 24. 8. 2026 cez Wiener Neustadt, Viedeň a Bratislavu domov.',
+      description: 'Posledný úsek 23. 8. 2026 cez Wiener Neustadt, Viedeň a Bratislavu domov.',
     },
     SPAT_2_POINTS,
   );
