@@ -1,33 +1,39 @@
 import type { Accommodation } from '@/types';
 
 /*
-  Ubytovanie. Rezervačné čísla, telefón a e-mail nie sú vyplnené zámerne –
-  aplikácia nevytvára falošné potvrdené rezervácie. Doplň z e-mailu s rezerváciou.
+  Ubytovanie. Yachting Residence je potvrdené (voucher CK Piešťany Tour, č. 2111126).
+  Ubytovanie v Rakúsku ešte treba vybrať.
 */
 
 export const ACCOMMODATIONS: Accommodation[] = [
   {
     id: 'acc-lignano',
     name: 'Yachting Residence',
-    address: 'Lignano Sabbiadoro, Taliansko',
-    coords: [13.13, 45.6789],
-    checkIn: '2026-08-14',
-    checkOut: '2026-08-23',
-    reservationNumber: undefined,
-    phone: undefined,
+    address: 'Viale Italia 70, 33054 Lignano Sabbiadoro, Taliansko',
+    coords: [13.1448582, 45.6967665],
+    checkIn: '2026-08-15',
+    checkOut: '2026-08-22',
+    reservationNumber: '2111126',
+    phone: '+39 334 908 5534',
     email: undefined,
     parking: 'overiť pred cestou',
-    petPolicy: 'overiť – potrebujeme písomné potvrdenie, že mačka je povolená',
+    petPolicy: 'potvrdenie od CK nespomína zvieratá výslovne – písomné potvrdenie, že mačka je povolená, si vyžiadaj priamo pri check-ine',
     petFee: 'doplniť',
-    status: 'overit',
-    notes: 'Súradnice sú približné (stred Lignana). Po potvrdení rezervácie doplň presnú adresu a GPS.',
+    status: 'potvrdene',
+    notes:
+      'Voucher CK Piešťany Tour č. 2111126. Check-in cca 13:00, večera 18:00 v deň príchodu. ' +
+      'Check-out s raňajkami, apartmán opustiť do 9:00. Delegátka Mária Matiščíková, tel. +39 334 908 5534. ' +
+      'Apartmán má servis, chladničku, kuchynský kút, soc. zariadenie – treba si priniesť vlastný jar, utierku, ' +
+      'zápalky, toaletný papier, uteráky, hygienické potreby a prípravky proti komárom. Miestna voda je pitná. ' +
+      'Upratovanie počas pobytu je na klientovi, hotelové služby sa neposkytujú. ' +
+      'Partner na mieste: Peruch e Lucchese, Viale dei Platani 54, Lignano Sabbiadoro.',
   },
   {
     id: 'acc-austria',
     name: 'Nevybrané ubytovanie',
     address: 'Graz alebo okolie, Rakúsko',
-    checkIn: '2026-08-23',
-    checkOut: '2026-08-24',
+    checkIn: '2026-08-22',
+    checkOut: '2026-08-23',
     parking: 'požiadavka: vlastné parkovanie',
     petPolicy: 'požiadavka: povolená mačka',
     budgetEur: 100,
