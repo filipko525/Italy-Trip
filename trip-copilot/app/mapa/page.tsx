@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ExternalLink, LocateFixed, Navigation, TriangleAlert } from 'lucide-react';
+import { Cat, Clock, CornerUpRight, LocateFixed, MapPin, TriangleAlert } from 'lucide-react';
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { RouteMap } from '@/components/map/RouteMap';
 import { MapFallback } from '@/components/map/MapFallback';
@@ -9,20 +9,22 @@ import { KilometerRibbon } from '@/components/trip/KilometerRibbon';
 import { TravelModePanel } from '@/components/trip/TravelModePanel';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Chip } from '@/components/ui/Chip';
+import { Chip, Tag } from '@/components/ui/Chip';
+import { Sheet } from '@/components/ui/Sheet';
 import { useAppState } from '@/lib/storage/app-state';
 import { usePoisAhead } from '@/hooks/usePoisAhead';
 import { hasMapbox } from '@/lib/mapbox/config';
 import { formatKm, formatMinutes } from '@/lib/calculations/geo';
-import { googleMapsUrl, wazeUrl } from '@/lib/geolocation/navigation-links';
-import { ACCOMMODATIONS } from '@/data/accommodations';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
+import type { PoiWithGeoContext } from '@/types';
 
 export default function MapaPage() {
   const { state, setSettings, setTravel } = useAppState();
-  const { position, ahead } = usePoisAhead();
+  const { position, all } = usePoisAhead();
   const [dark, setDark] = useState(false);
   const [online, setOnline] = useState(true);
+  const [selectedPoi, setSelectedPoi] = useState<PoiWithGeoContext | null>(null);
+  const nextStop = all.find((p) => p.isAhead && !state.visitedPoiIds.includes(p.id)) ?? null;
 
   useEffect(() => {
     const read = () => setDark(document.documentElement.dataset.theme === 'dark');
@@ -47,12 +49,6 @@ export default function MapaPage() {
     () => ({ route: position.route, direction: state.settings.direction }),
     [position.route, state.settings.direction],
   );
-
-  const nextStop = ahead[0] ?? null;
-  const finalTarget =
-    direction === 'tam' ? ACCOMMODATIONS[0].coords ?? route.geometry[route.geometry.length - 1] : route.geometry[route.geometry.length - 1];
-  const navTarget = nextStop?.coords ?? finalTarget;
-  const navLabel = nextStop ? nextStop.name : direction === 'tam' ? 'Lignano Sabbiadoro' : 'Trnava';
 
   const showMap = hasMapbox() && online;
 
@@ -81,7 +77,8 @@ export default function MapaPage() {
             key={dark ? 'dark' : 'light'}
             route={route}
             position={position.coords}
-            pois={ahead}
+            pois={all}
+            onSelectPoi={setSelectedPoi}
             dark={dark}
           />
         ) : (
@@ -148,22 +145,10 @@ export default function MapaPage() {
           </dl>
         </Card>
 
-        <div className="grid grid-cols-1 gap-2">
-          <a href={googleMapsUrl(navTarget, navLabel)} target="_blank" rel="noreferrer">
-            <Button size="lg" full icon={<Navigation size={20} />}>
-              Otvoriť v Google Maps
-            </Button>
-          </a>
-          <a href={wazeUrl(navTarget)} target="_blank" rel="noreferrer">
-            <Button size="lg" full variant="secondary" icon={<ExternalLink size={18} />}>
-              Otvoriť vo Waze
-            </Button>
-          </a>
-          <p className="px-1 text-xs text-muted">
-            Cieľ navigácie: {navLabel}. Turn-by-turn navigáciu robí Google Maps alebo Waze, táto
-            aplikácia ju nenahrádza.
-          </p>
-        </div>
+        <p className="px-1 text-xs text-muted">
+          Bodky na mape sú možné zastávky – klikni na ne pre podrobnosti. Navigáciu si spusti vo
+          svojej vlastnej appke (Google Maps a pod.).
+        </p>
 
         {!state.travel.active ? (
           <Button
@@ -250,6 +235,55 @@ export default function MapaPage() {
           )}
         </Card>
       </div>
+
+      <Sheet
+        open={selectedPoi !== null}
+        onClose={() => setSelectedPoi(null)}
+        title={selectedPoi?.name ?? ''}
+      >
+        {selectedPoi ? (
+          <div className="space-y-3">
+            <p className="eyebrow">{POI_CATEGORY_LABELS[selectedPoi.category]}</p>
+            {selectedPoi.region ? <p className="text-sm text-muted">{selectedPoi.region}</p> : null}
+
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <MapPin size={15} className="text-muted" />
+                <span>{formatKm(selectedPoi.distanceFromRouteKm)} od trasy</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CornerUpRight size={15} className="text-muted" />
+                <span>
+                  zachádzka{' '}
+                  <span className="tnum font-medium">
+                    {selectedPoi.estimatedDetourMinutes === 0
+                      ? 'žiadna'
+                      : formatMinutes(selectedPoi.estimatedDetourMinutes)}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock size={15} className="text-muted" />
+                <span>
+                  zastávka <span className="tnum font-medium">{selectedPoi.stopMinutes} min</span>
+                </span>
+              </div>
+            </dl>
+
+            <div className="flex flex-wrap gap-1.5">
+              {selectedPoi.catFriendly ? (
+                <Tag tone="sea">
+                  <Cat size={13} /> vhodné so Sumi
+                </Tag>
+              ) : null}
+              {selectedPoi.openingHours ? <Tag>otvorené: {selectedPoi.openingHours}</Tag> : null}
+              {selectedPoi.isMockData ? <Tag tone="danger">testovacie dáta</Tag> : null}
+            </div>
+
+            {selectedPoi.note ? <p className="text-sm text-muted">{selectedPoi.note}</p> : null}
+          </div>
+        ) : null}
+      </Sheet>
     </main>
   );
 }
