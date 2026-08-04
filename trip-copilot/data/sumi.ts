@@ -18,7 +18,7 @@ export const SUMI_DOCS_CHECKLIST: Checklist = {
   items: [
     { id: 's-d-1', label: 'Európsky pas spoločenského zvieraťa' },
     { id: 's-d-2', label: 'Mikročip – funkčný a zapísaný v pase' },
-    { id: 's-d-3', label: 'Platné očkovanie proti besnote', note: 'Musí platiť aj 24. 8. 2026' },
+    { id: 's-d-3', label: 'Platné očkovanie proti besnote', note: 'Musí platiť aj 23. 8. 2026' },
     { id: 's-d-4', label: 'Kontrola údajov v pase', note: 'Meno, číslo čipu, dátumy, pečiatky' },
     { id: 's-d-5', label: 'Písomné potvrdenie mačky v ubytovaní' },
   ],
