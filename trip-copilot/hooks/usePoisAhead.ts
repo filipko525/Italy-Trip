@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import type { PoiCategory, PoiWithGeoContext } from '@/types';
 import { POINTS_OF_INTEREST } from '@/data/poi';
-import { useAppState } from '@/lib/storage/app-state';
 import { useTripPosition, type TripPosition } from '@/hooks/useTripPosition';
 import {
   etaMinutesForKm,
@@ -45,7 +44,6 @@ export function usePoisAhead(filters: AheadFilters = DEFAULT_FILTERS): {
   filtered: PoiWithGeoContext[];
 } {
   const position = useTripPosition();
-  const { state } = useAppState();
 
   const all = useMemo<PoiWithGeoContext[]>(() => {
     const { route, progressKm, coords } = position;
@@ -80,8 +78,8 @@ export function usePoisAhead(filters: AheadFilters = DEFAULT_FILTERS): {
   }, [position]);
 
   const ahead = useMemo(
-    () => all.filter((p) => p.isAhead && !state.visitedPoiIds.includes(p.id)),
-    [all, state.visitedPoiIds],
+    () => all.filter((p) => p.isAhead),
+    [all],
   );
 
   const filtered = useMemo(() => {
