@@ -22,6 +22,7 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // Inicializácia mapy
   useEffect(() => {
@@ -44,6 +45,21 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
 
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
       mapRef.current = map;
+
+      // Mapa sa vie vytvoriť skôr, než má kontajner definitívny rozmer (napr. hneď
+      // po prvom vykreslení stránky) – vtedy zostane "zaseknutá" na zlej veľkosti,
+      // kým sa niečo nestane (napr. prepnutie záložky). ResizeObserver ju prinúti
+      // prepočítať sa vždy, keď sa kontajner reálne zmení.
+      const resizeObserver = new ResizeObserver(() => {
+        map.resize();
+      });
+      resizeObserver.observe(containerRef.current);
+      resizeObserverRef.current = resizeObserver;
+
+      // Poistka: aj bez zmeny rozmerov niekedy prehliadač dokončí layout
+      // až po prvom render tiku, tak mapu ešte raz prepočítame o chvíľu.
+      requestAnimationFrame(() => map.resize());
+      setTimeout(() => map.resize(), 300);
 
       map.on('load', () => {
         map.addSource('route', {
@@ -81,6 +97,8 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
 
     return () => {
       cancelled = true;
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
     };
   }, [route, dark]);
 
