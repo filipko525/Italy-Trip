@@ -21,8 +21,8 @@ export const TOLLS: TollItem[] = [
     name: 'Rakúska 10-dňová známka',
     type: 'znamka',
     description: 'Pokrýva cestu tam aj pobyt. Digitálnu známku kupuj s predstihom – platí až po odkladacej lehote.',
-    validFrom: '2026-08-14',
-    validTo: '2026-08-23',
+    validFrom: '2026-08-15',
+    validTo: '2026-08-24',
     purchased: false,
   },
   {
@@ -30,11 +30,14 @@ export const TOLLS: TollItem[] = [
     country: 'AT',
     name: 'Rakúska jednodňová známka',
     type: 'znamka',
-    description: 'Na posledný úsek 24. 8. 2026, keď 10-dňová už neplatí.',
+    description:
+      'S posunutým odchodom (15. 8.) by 10-dňová známka (platná do 24. 8.) mala pokryť celú cestu ' +
+      'tam aj späť – návrat cez Rakúsko je totiž už 22.–23. 8. Túto jednodňovú by ste nemali potrebovať, ' +
+      'over si to ale pred cestou.',
     validFrom: '2026-08-24',
     validTo: '2026-08-24',
     purchased: false,
-    note: 'Alternatíva: kúpiť druhú 10-dňovú, ak vyjde podobne.',
+    note: 'Pravdepodobne netreba – ponechané len ako záloha, ak by sa plán ešte zmenil.',
   },
   {
     id: 'toll-at-tunnel',
