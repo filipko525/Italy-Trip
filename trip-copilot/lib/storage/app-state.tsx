@@ -53,6 +53,7 @@ export const INITIAL_STATE: AppState = {
   petLog: { notes: '' },
   travel: { active: false, status: 'jazda' },
   accommodationNotes: {},
+  planOverrides: {},
 };
 
 interface AppStateContextValue {
@@ -77,6 +78,8 @@ interface AppStateContextValue {
   updatePetLog: (patch: Partial<PetLog>) => void;
   setTravel: (patch: Partial<TravelState>) => void;
   setSettings: (patch: Partial<AppState['settings']>) => void;
+  setPlanOverride: (id: string, patch: { date?: string; time?: string }) => void;
+  clearPlanOverride: (id: string) => void;
 }
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -96,6 +99,7 @@ function loadState(): AppState {
       settings: { ...INITIAL_STATE.settings, ...parsed.settings },
       petLog: { ...INITIAL_STATE.petLog, ...parsed.petLog },
       travel: { ...INITIAL_STATE.travel, ...parsed.travel },
+      planOverrides: { ...INITIAL_STATE.planOverrides, ...parsed.planOverrides },
     };
   } catch {
     return INITIAL_STATE;
@@ -241,6 +245,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
       setSettings: (patch) =>
         update((prev) => ({ ...prev, settings: { ...prev.settings, ...patch } })),
+
+      setPlanOverride: (id, patch) =>
+        update((prev) => ({
+          ...prev,
+          planOverrides: {
+            ...prev.planOverrides,
+            [id]: { ...prev.planOverrides[id], ...patch },
+          },
+        })),
+
+      clearPlanOverride: (id) =>
+        update((prev) => {
+          const next = { ...prev.planOverrides };
+          delete next[id];
+          return { ...prev, planOverrides: next };
+        }),
     };
   }, [state, ready, update]);
 
