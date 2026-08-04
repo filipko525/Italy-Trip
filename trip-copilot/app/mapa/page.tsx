@@ -96,6 +96,71 @@ export default function MapaPage() {
 
       <div className="space-y-4 px-4 py-4">
         <Card className="p-4">
+          <p className="eyebrow mb-2">Poloha</p>
+
+          {state.settings.useMockLocation ? (
+            <>
+              <p className="text-sm text-muted">
+                Zapnutá je <strong>testovacia poloha</strong>. Posuvníkom sa presúvaš po trase a vieš
+                si vyskúšať, čo appka ukáže napríklad pri Grazi.
+              </p>
+              <label className="mt-3 block">
+                <span className="tnum font-condensed text-sm uppercase tracking-wide text-muted">
+                  Poloha na trase: {Math.round(state.settings.mockProgressKm)} km z {route.distanceKm} km
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={route.distanceKm}
+                  step={5}
+                  value={state.settings.mockProgressKm}
+                  onChange={(e) => setSettings({ mockProgressKm: Number(e.target.value) })}
+                  className="mt-2 w-full accent-[rgb(var(--c-signal))]"
+                  aria-label="Testovacia poloha na trase"
+                />
+              </label>
+              <Button
+                className="mt-3"
+                full
+                variant="secondary"
+                icon={<LocateFixed size={18} />}
+                onClick={() => setSettings({ useMockLocation: false })}
+              >
+                Prepnúť na skutočnú GPS
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm">
+                {position.geo.permission === 'granted'
+                  ? `Poloha aktívna, presnosť ${Math.round(position.geo.accuracyM ?? 0)} m.`
+                  : 'Čakám na povolenie polohy.'}
+              </p>
+              {position.geo.message ? (
+                <p className="mt-2 flex items-start gap-2 rounded-2xl bg-signal/12 p-3 text-sm text-signal">
+                  <TriangleAlert size={16} className="mt-0.5 shrink-0" />
+                  {position.geo.message}
+                </p>
+              ) : null}
+              {!position.onRoute && position.coords ? (
+                <p className="mt-2 text-sm text-muted">
+                  Si {formatKm(position.distanceFromRouteKm)} od trasy. Body pred nami sa počítajú
+                  podľa najbližšieho miesta na trase.
+                </p>
+              ) : null}
+              <Button
+                className="mt-3"
+                full
+                variant="secondary"
+                onClick={() => setSettings({ useMockLocation: true })}
+              >
+                Späť na testovaciu polohu
+              </Button>
+            </>
+          )}
+        </Card>
+
+        <Card className="p-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <p className="eyebrow">Zostáva</p>
@@ -169,71 +234,6 @@ export default function MapaPage() {
         ) : (
           <TravelModePanel />
         )}
-
-        <Card className="p-4">
-          <p className="eyebrow mb-2">Poloha</p>
-
-          {state.settings.useMockLocation ? (
-            <>
-              <p className="text-sm text-muted">
-                Zapnutá je <strong>testovacia poloha</strong>. Posuvníkom sa presúvaš po trase a vieš
-                si vyskúšať, čo appka ukáže napríklad pri Grazi.
-              </p>
-              <label className="mt-3 block">
-                <span className="tnum font-condensed text-sm uppercase tracking-wide text-muted">
-                  Poloha na trase: {Math.round(state.settings.mockProgressKm)} km z {route.distanceKm} km
-                </span>
-                <input
-                  type="range"
-                  min={0}
-                  max={route.distanceKm}
-                  step={5}
-                  value={state.settings.mockProgressKm}
-                  onChange={(e) => setSettings({ mockProgressKm: Number(e.target.value) })}
-                  className="mt-2 w-full accent-[rgb(var(--c-signal))]"
-                  aria-label="Testovacia poloha na trase"
-                />
-              </label>
-              <Button
-                className="mt-3"
-                full
-                variant="secondary"
-                icon={<LocateFixed size={18} />}
-                onClick={() => setSettings({ useMockLocation: false })}
-              >
-                Prepnúť na skutočnú GPS
-              </Button>
-            </>
-          ) : (
-            <>
-              <p className="text-sm">
-                {position.geo.permission === 'granted'
-                  ? `Poloha aktívna, presnosť ${Math.round(position.geo.accuracyM ?? 0)} m.`
-                  : 'Čakám na povolenie polohy.'}
-              </p>
-              {position.geo.message ? (
-                <p className="mt-2 flex items-start gap-2 rounded-2xl bg-signal/12 p-3 text-sm text-signal">
-                  <TriangleAlert size={16} className="mt-0.5 shrink-0" />
-                  {position.geo.message}
-                </p>
-              ) : null}
-              {!position.onRoute && position.coords ? (
-                <p className="mt-2 text-sm text-muted">
-                  Si {formatKm(position.distanceFromRouteKm)} od trasy. Body pred nami sa počítajú
-                  podľa najbližšieho miesta na trase.
-                </p>
-              ) : null}
-              <Button
-                className="mt-3"
-                full
-                variant="secondary"
-                onClick={() => setSettings({ useMockLocation: true })}
-              >
-                Späť na testovaciu polohu
-              </Button>
-            </>
-          )}
-        </Card>
       </div>
 
       <Sheet
