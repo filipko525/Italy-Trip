@@ -55,6 +55,7 @@ export const INITIAL_STATE: AppState = {
   accommodationNotes: {},
   planOverrides: {},
   petProfileOverrides: {},
+  insuranceOverrides: {},
 };
 
 interface AppStateContextValue {
@@ -82,6 +83,7 @@ interface AppStateContextValue {
   setPlanOverride: (id: string, patch: { date?: string; time?: string }) => void;
   clearPlanOverride: (id: string) => void;
   setPetProfile: (patch: Partial<AppState['petProfileOverrides']>) => void;
+  setInsurance: (patch: Partial<AppState['insuranceOverrides']>) => void;
 }
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -103,6 +105,7 @@ function loadState(): AppState {
       travel: { ...INITIAL_STATE.travel, ...parsed.travel },
       planOverrides: { ...INITIAL_STATE.planOverrides, ...parsed.planOverrides },
       petProfileOverrides: { ...INITIAL_STATE.petProfileOverrides, ...parsed.petProfileOverrides },
+      insuranceOverrides: { ...INITIAL_STATE.insuranceOverrides, ...parsed.insuranceOverrides },
     };
   } catch {
     return INITIAL_STATE;
@@ -269,6 +272,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         update((prev) => ({
           ...prev,
           petProfileOverrides: { ...prev.petProfileOverrides, ...patch },
+        })),
+
+      setInsurance: (patch) =>
+        update((prev) => ({
+          ...prev,
+          insuranceOverrides: { ...prev.insuranceOverrides, ...patch },
         })),
     };
   }, [state, ready, update]);
