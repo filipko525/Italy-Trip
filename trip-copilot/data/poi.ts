@@ -1,4 +1,4 @@
-import type { CountryCode, LngLat, PoiCategory, PointOfInterest } from '@/types';
+import type { CountryCode, LngLat, PoiCategory, PointOfInterest, RouteDirection } from '@/types';
 
 /* =========================================================
    BODY ZÁUJMU (POI)
@@ -45,6 +45,8 @@ interface PoiInput {
   quiet?: boolean;
   openingHours?: string;
   note?: string;
+  /** Pre ktorý smer bod platí. Bez hodnoty = platí pre oba (cesta tam aj späť). */
+  directions?: RouteDirection[];
 }
 
 const poi = (input: PoiInput): PointOfInterest => ({
@@ -67,6 +69,25 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     catFriendly: true,
     openingHours: '6:00 – 22:00',
     note: 'Podľa recenzií jedna z najlacnejších naft na Slovensku. Posledné tankovanie pred hranicou – natankuj tu naplno, malo by vydržať až po Taliansko.',
+    directions: ['tam'],
+  }),
+
+  /* --- Rakúsko: A4 pri Parndorfe (len cesta tam, cez Burgenland) --- */
+  poi({
+    id: 'at-parndorf',
+    name: 'ASFINAG Rastplatz Parndorf',
+    category: 'odpocivadlo',
+    region: 'Parndorf',
+    country: 'AT',
+    coords: [16.876542, 47.9705306],
+    detourMinutes: 0,
+    stopMinutes: 15,
+    catFriendly: true,
+    shade: false,
+    quiet: false,
+    openingHours: 'nonstop',
+    note: 'Prvá rakúska zastávka na trase tam (cesta späť ide inadiaľ). Veľké parkovisko, sprchy aj WC zdarma.',
+    directions: ['tam'],
   }),
 
   /* --- Rakúsko: A2 Wiener Neustadt --- */
@@ -101,23 +122,25 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     quiet: true,
     openingHours: 'nonstop',
     note: 'Čerpačka Shell priamo na mieste, pekný výhľad na hory. Podľa recenzií obľúbená prestávka na trase Viedeň–Graz.',
+    directions: ['tam'],
   }),
 
-  /* --- Rakúsko: pri Grazi --- */
+  /* --- Rakúsko: Judenburg/Zeltweg, S36 obchádza Graz (len cesta tam) --- */
   poi({
-    id: 'at-graz',
-    name: 'ASFINAG Rastplatz Laßnitzhöhe',
+    id: 'at-zeltweg',
+    name: 'M-Rast Zeltweg',
     category: 'odpocivadlo',
-    region: 'Graz',
+    region: 'Judenburg',
     country: 'AT',
-    coords: [15.5822704, 47.0642046],
+    coords: [14.722053, 47.1941494],
     detourMinutes: 0,
     stopMinutes: 20,
     catFriendly: true,
     shade: true,
     quiet: false,
     openingHours: 'nonstop',
-    note: 'Približne polovica trasy – vhodné na dlhšiu prestávku. Veľké parkovisko, WC zdarma, kávové automaty, aj priestor pre deti.',
+    note: 'Približne polovica trasy tam. Skvele hodnotené (reštaurácia, sprchy, WC zdarma, aj Tesla supercharger). Cesta späť ide inou vetvou, tadiaľto nejde.',
+    directions: ['tam'],
   }),
 
   /* --- Rakúsko: Wörthersee --- */
@@ -200,6 +223,7 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     stopMinutes: 15,
     catFriendly: true,
     note: 'Priamo na ceste smer Latisana, teda presne v smere odchodu domov. Podľa recenzií ochotná obsluha. Natankuj tu 22. 8. pred odchodom.',
+    directions: ['spat'],
   }),
 ];
 
