@@ -13,7 +13,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { useAppState } from '@/lib/storage/app-state';
 import { usePoisAhead } from '@/hooks/usePoisAhead';
 import { hasMapbox } from '@/lib/mapbox/config';
-import { etaMinutesForKm, formatKm, formatMinutes } from '@/lib/calculations/geo';
+import { formatKm, formatMinutes } from '@/lib/calculations/geo';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
 import type { PoiWithGeoContext } from '@/types';
 
@@ -194,27 +194,25 @@ export default function MapaPage() {
             </div>
           </div>
 
-          {position.nextWaypoint ? (
+          {nextStop ? (
             <div className="mt-4 rounded-2xl bg-raised/60 p-3">
               <p className="eyebrow">Nasleduje</p>
-              <p className="mt-0.5 text-lg font-semibold leading-snug">
-                {position.nextWaypoint.name}
-              </p>
+              <p className="mt-0.5 text-lg font-semibold leading-snug">{nextStop.name}</p>
               <p className="tnum mt-0.5 text-sm text-muted">
-                {formatKm(position.distanceToNextWaypointKm ?? 0)} · o{' '}
-                {formatMinutes(etaMinutesForKm(position.distanceToNextWaypointKm ?? 0))}
+                {POI_CATEGORY_LABELS[nextStop.category]} · {formatKm(nextStop.distanceToUserKm)} ·
+                o {formatMinutes(nextStop.etaMinutes)}
               </p>
-              {position.nextWaypoint.note ? (
+              {nextStop.note ? (
                 <p className="mt-1.5 text-sm text-muted">
                   <span className="font-medium text-ink">Dôvod: </span>
-                  {position.nextWaypoint.note}
+                  {nextStop.note}
                 </p>
               ) : null}
             </div>
           ) : (
             <div className="mt-4 rounded-2xl bg-raised/60 p-3">
               <p className="eyebrow">Nasleduje</p>
-              <p className="mt-0.5 text-lg font-semibold leading-snug">Cieľ trasy</p>
+              <p className="mt-0.5 text-lg font-semibold leading-snug">Žiadna zastávka pred nami</p>
             </div>
           )}
 
@@ -224,19 +222,13 @@ export default function MapaPage() {
               <dd className="text-right font-medium">{position.currentSegment?.name ?? '–'}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-muted">Najbližšia zastávka</dt>
+              <dt className="text-muted">Ďalší bod na trase</dt>
               <dd className="text-right font-medium">
-                {nextStop
-                  ? `${nextStop.name} · ${formatKm(nextStop.distanceToUserKm)}`
-                  : 'žiadna pred nami'}
+                {position.nextWaypoint
+                  ? `${position.nextWaypoint.name} · ${formatKm(position.distanceToNextWaypointKm ?? 0)}`
+                  : 'cieľ'}
               </dd>
             </div>
-            {nextStop ? (
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted">Kategória</dt>
-                <dd className="text-right font-medium">{POI_CATEGORY_LABELS[nextStop.category]}</dd>
-              </div>
-            ) : null}
           </dl>
         </Card>
 
