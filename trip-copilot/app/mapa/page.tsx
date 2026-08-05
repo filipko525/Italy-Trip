@@ -177,8 +177,15 @@ export default function MapaPage() {
           </div>
 
           <div className="mt-4">
-            <KilometerRibbon route={route} progressKm={position.progressKm} />
+            <KilometerRibbon route={route} progressKm={position.progressKm} showLabels={false} />
           </div>
+
+          {position.nextWaypoint ? (
+            <div className="mt-3 rounded-2xl bg-raised/60 px-3 py-2">
+              <p className="eyebrow">Nasleduje</p>
+              <p className="mt-0.5 font-semibold leading-snug">{position.nextWaypoint.name}</p>
+            </div>
+          ) : null}
 
           <dl className="mt-4 space-y-1.5 text-sm">
             <div className="flex justify-between gap-3">
