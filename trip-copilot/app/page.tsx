@@ -108,8 +108,8 @@ export default function HomePage() {
             href="/mapa"
             icon={<RouteIcon size={18} />}
             eyebrow="Trasa tam"
-            title="669 km"
-            detail="Trnava → Lignano, cez Graz a Tarvisio"
+            title="636 km"
+            detail="Trnava → Lignano, cez Judenburg a Tarvisio"
           />
           <HomeCard
             href="/plan"
