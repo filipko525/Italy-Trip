@@ -79,7 +79,7 @@ export const PLAN: PlanItem[] = [
     date: '2026-08-23',
     time: '09:00',
     title: 'Odchod z Rakúska',
-    detail: 'Graz alebo okolie → Wiener Neustadt → Viedeň → Bratislava → Trnava. Približne 272 km.',
+    detail: 'Graz alebo okolie → Fürstenfeld/Oberwart (S31, Burgenland) → južne popri Viedni (Baden) → Bratislava → Trnava. Približne 272 km.',
     kind: 'jazda',
     tentative: true,
   },
