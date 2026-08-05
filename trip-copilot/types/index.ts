@@ -86,6 +86,8 @@ export interface PointOfInterest {
   note?: string;
   /** TRUE = testovacie dáta, miesto nie je overené. */
   isMockData: boolean;
+  /** Pre ktorý smer bod platí. Bez hodnoty = platí pre oba (cesta tam aj späť). */
+  directions?: RouteDirection[];
 }
 
 /** POI obohatené o výpočty voči aktuálnej polohe. */
