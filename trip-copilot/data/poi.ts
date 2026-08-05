@@ -105,6 +105,7 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     quiet: false,
     openingHours: 'nonstop',
     note: 'Prvá bezpečná prestávka po cca hodine jazdy. WC zdarma, pitná voda, veľké parkovisko.',
+    directions: ['tam'],
   }),
 
   /* --- Rakúsko: Wechsel/Zöbern --- */
