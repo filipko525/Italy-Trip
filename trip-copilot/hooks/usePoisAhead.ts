@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import type { PoiCategory, PoiWithGeoContext } from '@/types';
 import { POINTS_OF_INTEREST } from '@/data/poi';
 import { useTripPosition, type TripPosition } from '@/hooks/useTripPosition';
+import { useAppState } from '@/lib/storage/app-state';
 import {
   etaMinutesForKm,
   haversineKm,
@@ -44,12 +45,16 @@ export function usePoisAhead(filters: AheadFilters = DEFAULT_FILTERS): {
   filtered: PoiWithGeoContext[];
 } {
   const position = useTripPosition();
+  const { state } = useAppState();
 
   const all = useMemo<PoiWithGeoContext[]>(() => {
     const { route, progressKm, coords } = position;
     const scaler = makeRouteScaler(route.geometry, route.distanceKm);
+    const direction = state.settings.direction;
 
-    return POINTS_OF_INTEREST.map((poi) => {
+    return POINTS_OF_INTEREST.filter(
+      (poi) => !poi.directions || poi.directions.includes(direction),
+    ).map((poi) => {
       const projection = projectOntoRoute(route.geometry, poi.coords, scaler.cumulative);
       const routeProgressKm = scaler.toRouteKm(projection.progressKm);
       const distanceAlongRoute = routeProgressKm - progressKm;
@@ -75,7 +80,7 @@ export function usePoisAhead(filters: AheadFilters = DEFAULT_FILTERS): {
         estimatedDetourMinutes,
       };
     }).sort((a, b) => a.routeProgressKm - b.routeProgressKm);
-  }, [position]);
+  }, [position, state.settings.direction]);
 
   const ahead = useMemo(
     () => all.filter((p) => p.isAhead),
