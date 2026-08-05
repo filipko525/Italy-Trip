@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Navigation2, CalendarDays, Wallet, Cat } from 'lucide-react';
+import { Map, Navigation2, CalendarDays, Wallet, Cat, ShieldCheck } from 'lucide-react';
 
 const ITEMS = [
   { href: '/mapa', label: 'Mapa', Icon: Map },
@@ -10,6 +10,7 @@ const ITEMS = [
   { href: '/plan', label: 'Plán', Icon: CalendarDays },
   { href: '/naklady', label: 'Náklady', Icon: Wallet },
   { href: '/sumi', label: 'Sumi', Icon: Cat },
+  { href: '/poistenie', label: 'Poistenie', Icon: ShieldCheck },
 ];
 
 export function BottomNav() {
@@ -20,7 +21,7 @@ export function BottomNav() {
       aria-label="Hlavná navigácia"
       className="fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 border-t border-line bg-surface/95 backdrop-blur safe-bottom"
     >
-      <ul className="grid grid-cols-5">
+      <ul className="grid grid-cols-6">
         {ITEMS.map(({ href, label, Icon }) => {
           const active = pathname === href;
           return (
