@@ -1,7 +1,7 @@
 'use client';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { LngLat, PoiWithGeoContext, Route } from '@/types';
 import { DEFAULT_VIEW, MAP_STYLES, MAPBOX_TOKEN } from '@/lib/mapbox/config';
 
@@ -23,6 +23,7 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   // Inicializácia mapy
   useEffect(() => {
@@ -92,6 +93,11 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
           new mapboxgl.LngLatBounds(route.geometry[0], route.geometry[0]),
         );
         map.fitBounds(bounds, { padding: 48, duration: 0 });
+
+        // Ostatné efekty (trasa pri zmene smeru, body záujmu, poloha auta) čakajú
+        // na tento signál – inak sa môže stať, že sa spustia skôr, než má mapa
+        // pripravený štýl, potichu zlyhajú a značky sa už nikdy nedokreslia.
+        setMapReady(true);
       });
     })();
 
@@ -100,12 +106,14 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
       resizeObserverRef.current?.disconnect();
       resizeObserverRef.current = null;
     };
-  }, [route, dark]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dark]);
 
-  // Aktualizácia trasy pri prepnutí smeru
+  // Aktualizácia trasy pri prepnutí smeru (aj nový výrez mapy, nová trasa má iný tvar)
   useEffect(() => {
+    if (!mapReady) return;
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded?.()) return;
+    if (!map) return;
     const source = map.getSource('route');
     if (source) {
       source.setData({
@@ -114,10 +122,19 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
         geometry: { type: 'LineString', coordinates: route.geometry },
       });
     }
-  }, [route]);
+    (async () => {
+      const mapboxgl = (await import('mapbox-gl')).default;
+      const bounds = route.geometry.reduce(
+        (b: any, c) => b.extend(c),
+        new mapboxgl.LngLatBounds(route.geometry[0], route.geometry[0]),
+      );
+      map.fitBounds(bounds, { padding: 48, duration: 300 });
+    })();
+  }, [route, mapReady]);
 
   // Body záujmu
   useEffect(() => {
+    if (!mapReady) return;
     let cancelled = false;
     (async () => {
       const map = mapRef.current;
@@ -144,10 +161,11 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [pois, onSelectPoi]);
+  }, [pois, onSelectPoi, mapReady]);
 
   // Poloha auta
   useEffect(() => {
+    if (!mapReady) return;
     let cancelled = false;
     (async () => {
       const map = mapRef.current;
@@ -168,7 +186,7 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [position]);
+  }, [position, mapReady]);
 
   return <div ref={containerRef} className="h-full w-full" aria-label="Mapa trasy" />;
 }
