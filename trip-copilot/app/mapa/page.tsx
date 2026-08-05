@@ -205,7 +205,10 @@ export default function MapaPage() {
                 {formatMinutes(etaMinutesForKm(position.distanceToNextWaypointKm ?? 0))}
               </p>
               {position.nextWaypoint.note ? (
-                <p className="mt-1.5 text-sm text-muted">{position.nextWaypoint.note}</p>
+                <p className="mt-1.5 text-sm text-muted">
+                  <span className="font-medium text-ink">Dôvod: </span>
+                  {position.nextWaypoint.note}
+                </p>
               ) : null}
             </div>
           ) : (
