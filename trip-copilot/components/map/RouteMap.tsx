@@ -11,17 +11,20 @@ interface Props {
   pois: PoiWithGeoContext[];
   onSelectPoi?: (poi: PoiWithGeoContext) => void;
   dark: boolean;
+  /** Výrazná značka navyše (napr. miesto nocľahu) – iný tvar/farba než bežné body. */
+  highlight?: { coords: LngLat; label: string } | null;
 }
 
 /**
  * Mapa trasy. Zámerne nerobí navigáciu – len zobrazuje, kde sme,
  * kadiaľ ideme a čo je okolo. Turn-by-turn preberá Google Maps alebo Waze.
  */
-export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
+export function RouteMap({ route, position, pois, onSelectPoi, dark, highlight }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
+  const highlightMarkerRef = useRef<any>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [mapReady, setMapReady] = useState(false);
 
@@ -187,6 +190,36 @@ export function RouteMap({ route, position, pois, onSelectPoi, dark }: Props) {
       cancelled = true;
     };
   }, [position, mapReady]);
+
+  // Výrazná značka navyše (napr. miesto nocľahu) – iný, nezameniteľný tvar (pin).
+  useEffect(() => {
+    if (!mapReady) return;
+    let cancelled = false;
+    (async () => {
+      const map = mapRef.current;
+      if (!map) return;
+      const mapboxgl = (await import('mapbox-gl')).default;
+      if (cancelled) return;
+
+      if (highlightMarkerRef.current) {
+        highlightMarkerRef.current.remove();
+        highlightMarkerRef.current = null;
+      }
+      if (highlight) {
+        const el = document.createElement('div');
+        el.setAttribute('aria-label', highlight.label);
+        el.style.cssText =
+          'width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#8B5CF6;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45)';
+        highlightMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat(highlight.coords)
+          .addTo(map);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [highlight, mapReady]);
 
   return <div ref={containerRef} className="h-full w-full" aria-label="Mapa trasy" />;
 }
