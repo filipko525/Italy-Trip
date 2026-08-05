@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
-import type { PoiCategory } from '@/types';
+import { Check, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import type { PoiCategory, PoiWithGeoContext } from '@/types';
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { PoiCard } from '@/components/cards/PoiCard';
 import { Card } from '@/components/ui/Card';
@@ -53,6 +53,7 @@ export default function PredNamiPage() {
 
   const list = useMemo(() => {
     return ahead.filter((p) => {
+      if (state.visitedPoiIds.includes(p.id)) return true;
       if (categories.length > 0 && !categories.includes(p.category)) return false;
       if (catOnly && !p.catFriendly) return false;
       if (detour !== null && p.estimatedDetourMinutes > detour) return false;
@@ -61,7 +62,7 @@ export default function PredNamiPage() {
       }
       return true;
     });
-  }, [ahead, categories, catOnly, detour, stop]);
+  }, [ahead, categories, catOnly, detour, stop, state.visitedPoiIds]);
 
   /** Rýchle tlačidlo nastaví kategórie, zachádzku aj dĺžku zastávky naraz. */
   const applyQuick = (quickId: string) => {
@@ -170,23 +171,27 @@ export default function PredNamiPage() {
           </Card>
         ) : (
           <ul className="space-y-3">
-            {list.map((poi) => (
-              <PoiCard
-                key={poi.id}
-                poi={poi}
-                saved={state.savedPoiIds.includes(poi.id)}
-                visited={state.visitedPoiIds.includes(poi.id)}
-                onToggleSaved={() => toggleSavedPoi(poi.id)}
-                onToggleVisited={() => toggleVisitedPoi(poi.id)}
-              />
-            ))}
+            {list.map((poi) =>
+              state.visitedPoiIds.includes(poi.id) ? (
+                <VisitedPoiRow key={poi.id} poi={poi} onUndo={() => toggleVisitedPoi(poi.id)} />
+              ) : (
+                <PoiCard
+                  key={poi.id}
+                  poi={poi}
+                  saved={state.savedPoiIds.includes(poi.id)}
+                  visited={false}
+                  onToggleSaved={() => toggleSavedPoi(poi.id)}
+                  onToggleVisited={() => toggleVisitedPoi(poi.id)}
+                />
+              ),
+            )}
           </ul>
         )}
 
         {state.visitedPoiIds.length > 0 ? (
           <p className="mt-4 text-center text-xs text-muted">
-            {state.visitedPoiIds.length} miest je označených ako navštívené a v zozname sa
-            nezobrazujú.
+            {state.visitedPoiIds.length} miest máš odfajknutých ako navštívené – sú zbalené v
+            zozname vyššie, klikni na "Vrátiť", keby si sa pomýlil/-a.
           </p>
         ) : null}
 
@@ -205,5 +210,29 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
       <p className="eyebrow mb-2">{label}</p>
       <div className="flex flex-wrap gap-2">{children}</div>
     </div>
+  );
+}
+
+/**
+ * Zbalený riadok pre už navštívené miesto. Zámerne ostáva v zozname (na svojom
+ * mieste podľa trasy) namiesto úplného zmiznutia – kým bod naozaj neminieme,
+ * dá sa jedným klikom vrátiť späť, keby sa niekto pomýlil pri odfajknutí.
+ */
+function VisitedPoiRow({ poi, onUndo }: { poi: PoiWithGeoContext; onUndo: () => void }) {
+  return (
+    <li className="flex items-center gap-3 rounded-2xl bg-raised/50 px-4 py-2.5">
+      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sea text-white">
+        <Check size={14} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm text-muted line-through">{poi.name}</p>
+      </div>
+      <button
+        onClick={onUndo}
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-muted"
+      >
+        <RotateCcw size={13} /> Vrátiť
+      </button>
+    </li>
   );
 }
