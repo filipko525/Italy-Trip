@@ -290,6 +290,24 @@ export interface DocumentStatus {
   note?: string;
 }
 
+/* ---------- Poistenie ---------- */
+
+/** Všetko ručne dopĺňané používateľom priamo v appke (lokálne úložisko, nikdy v kóde). */
+export interface InsuranceProfile {
+  insurer?: string;
+  policyNumber?: string;
+  vehicleModel?: string;
+  vehiclePlate?: string;
+  vehicleVin?: string;
+  validUntil?: string;
+  coverageNote?: string;
+  assistancePhone?: string;
+  emergencyNote?: string;
+  /** Fotka dokladu (napr. PZP certifikát), uložená len lokálne ako base64. */
+  documentDataUrl?: string;
+  documentName?: string;
+}
+
 /* ---------- Stav aplikácie (lokálne úložisko) ---------- */
 
 export interface AppSettings {
@@ -326,4 +344,6 @@ export interface AppState {
     vetPhone?: string;
     photoDataUrl?: string;
   };
+  /** Ručne doplnené údaje o poistení (zmluva, vozidlo, asistencia) a fotka dokladu. */
+  insuranceOverrides: InsuranceProfile;
 }
