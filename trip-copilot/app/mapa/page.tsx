@@ -5,7 +5,6 @@ import { Cat, Clock, CornerUpRight, LocateFixed, MapPin, TriangleAlert } from 'l
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { RouteMap } from '@/components/map/RouteMap';
 import { MapFallback } from '@/components/map/MapFallback';
-import { KilometerRibbon } from '@/components/trip/KilometerRibbon';
 import { TravelModePanel } from '@/components/trip/TravelModePanel';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -14,7 +13,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { useAppState } from '@/lib/storage/app-state';
 import { usePoisAhead } from '@/hooks/usePoisAhead';
 import { hasMapbox } from '@/lib/mapbox/config';
-import { formatKm, formatMinutes } from '@/lib/calculations/geo';
+import { etaMinutesForKm, formatKm, formatMinutes } from '@/lib/calculations/geo';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
 import type { PoiWithGeoContext } from '@/types';
 
@@ -50,6 +49,17 @@ export default function MapaPage() {
     [position.route, state.settings.direction],
   );
 
+  /** Nocľah cestou (len smer späť) – nájdeme bod trasy s poznámkou o nocľahu, nech je
+      vidno vždy, aj keď sme ešte ďaleko od Grazu. */
+  const overnightWaypoint = useMemo(() => {
+    if (direction !== 'spat') return null;
+    for (const seg of route.segments) {
+      const wp = seg.waypoints.find((w) => w.note?.includes('Nocľah'));
+      if (wp) return wp;
+    }
+    return null;
+  }, [route, direction]);
+
   const showMap = hasMapbox() && online;
 
   return (
@@ -71,6 +81,14 @@ export default function MapaPage() {
         </Chip>
       </div>
 
+      {overnightWaypoint ? (
+        <div className="mx-4 mb-3 rounded-2xl bg-signal/12 p-3">
+          <p className="eyebrow text-signal">Nocľah cestou</p>
+          <p className="mt-0.5 font-semibold leading-snug">{overnightWaypoint.name}</p>
+          <p className="mt-0.5 text-sm text-muted">{overnightWaypoint.note}</p>
+        </div>
+      ) : null}
+
       <div className="relative mx-4 h-[46vh] min-h-[280px] overflow-hidden rounded-card border border-line">
         {showMap ? (
           <RouteMap
@@ -87,7 +105,7 @@ export default function MapaPage() {
             position={position.coords}
             reason={
               !online
-                ? 'Si offline, mapové dlaždice sa nedajú načítať. Toto je zjednodušený zákres trasy – plán, checklisty a zastávky fungujú ďalej.'
+                ? 'Si offline, mapové dlaždice sa nedajú načítať. Toto je zjednodušený zákres trasy – plán, checklisty a zastávky funguhú ďalej.'
                 : 'Chýba Mapbox token. Doplň NEXT_PUBLIC_MAPBOX_TOKEN do .env.local a mapa sa načíta. Zatiaľ vidíš schému trasy.'
             }
           />
@@ -176,29 +194,31 @@ export default function MapaPage() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <KilometerRibbon route={route} progressKm={position.progressKm} showLabels={false} />
-          </div>
-
           {position.nextWaypoint ? (
-            <div className="mt-3 rounded-2xl bg-raised/60 px-3 py-2">
+            <div className="mt-4 rounded-2xl bg-raised/60 p-3">
               <p className="eyebrow">Nasleduje</p>
-              <p className="mt-0.5 font-semibold leading-snug">{position.nextWaypoint.name}</p>
+              <p className="mt-0.5 text-lg font-semibold leading-snug">
+                {position.nextWaypoint.name}
+              </p>
+              <p className="tnum mt-0.5 text-sm text-muted">
+                {formatKm(position.distanceToNextWaypointKm ?? 0)} · o{' '}
+                {formatMinutes(etaMinutesForKm(position.distanceToNextWaypointKm ?? 0))}
+              </p>
+              {position.nextWaypoint.note ? (
+                <p className="mt-1.5 text-sm text-muted">{position.nextWaypoint.note}</p>
+              ) : null}
             </div>
-          ) : null}
+          ) : (
+            <div className="mt-4 rounded-2xl bg-raised/60 p-3">
+              <p className="eyebrow">Nasleduje</p>
+              <p className="mt-0.5 text-lg font-semibold leading-snug">Cieľ trasy</p>
+            </div>
+          )}
 
           <dl className="mt-4 space-y-1.5 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-muted">Úsek</dt>
               <dd className="text-right font-medium">{position.currentSegment?.name ?? '–'}</dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">Ďalší bod trasy</dt>
-              <dd className="text-right font-medium">
-                {position.nextWaypoint
-                  ? `${position.nextWaypoint.name} · ${formatKm(position.distanceToNextWaypointKm ?? 0)}`
-                  : 'cieľ'}
-              </dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-muted">Najbližšia zastávka</dt>
