@@ -98,6 +98,11 @@ export default function MapaPage() {
             pois={all}
             onSelectPoi={setSelectedPoi}
             dark={dark}
+            highlight={
+              overnightWaypoint
+                ? { coords: overnightWaypoint.coords, label: overnightWaypoint.name }
+                : null
+            }
           />
         ) : (
           <MapFallback
