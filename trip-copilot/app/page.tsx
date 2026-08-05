@@ -92,7 +92,7 @@ export default function HomePage() {
               {CESTA_TAM.distanceKm} km · {formatMinutes(CESTA_TAM.drivingMinutes)}
             </p>
           </div>
-          <KilometerRibbon route={CESTA_TAM} progressKm={position.progressKm} />
+          <KilometerRibbon route={CESTA_TAM} progressKm={position.progressKm} showLabels={false} />
         </Card>
 
         <button
