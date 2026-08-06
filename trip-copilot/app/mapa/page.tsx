@@ -18,6 +18,11 @@ import { formatKm, formatMinutes } from '@/lib/calculations/geo';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
 import type { PoiWithGeoContext } from '@/types';
 
+/** Presné adresy pre Google Maps odkaz – nie súradnice z našej zjednodušenej
+    geometrie, nech Google Maps nájde presne tú istú trasu ako v reálnom živote. */
+const HOME_ADDRESS = 'Priečna 4, 917 01 Trnava';
+const LIGNANO_ADDRESS = 'Viale Italia 70, 33054 Lignano Sabbiadoro, Taliansko';
+
 export default function MapaPage() {
   const { state, setSettings, setTravel } = useAppState();
   const { position, all } = usePoisAhead();
@@ -48,6 +53,15 @@ export default function MapaPage() {
   const { route, direction } = useMemo(
     () => ({ route: position.route, direction: state.settings.direction }),
     [position.route, state.settings.direction],
+  );
+
+  /** Presný štart/cieľ pre Google Maps – adresa, nie súradnice z geometrie. */
+  const { originAddress, destinationAddress } = useMemo(
+    () =>
+      direction === 'tam'
+        ? { originAddress: HOME_ADDRESS, destinationAddress: LIGNANO_ADDRESS }
+        : { originAddress: LIGNANO_ADDRESS, destinationAddress: HOME_ADDRESS },
+    [direction],
   );
 
   /** Nocľah cestou (len smer späť) – nájdeme bod trasy s poznámkou o nocľahu, nech je
@@ -87,13 +101,19 @@ export default function MapaPage() {
           size="lg"
           full
           icon={<Navigation size={20} />}
-          onClick={() => openFullRouteInGoogleMaps(route)}
+          onClick={() =>
+            openFullRouteInGoogleMaps(
+              originAddress,
+              destinationAddress,
+              all.map((p) => p.coords),
+            )
+          }
         >
           Otvoriť v Google Maps
         </Button>
         <p className="mt-1.5 px-1 text-xs text-muted">
-          Spustí sa appka Google Maps s celou trasou ({route.name}). Ak appku nemáš, otvorí sa
-          webová verzia.
+          Spustí sa appka Google Maps s celou trasou ({route.name}) aj so zastávkami z tejto
+          obrazovky. Ak appku nemáš, otvorí sa webová verzia.
         </p>
       </div>
 
