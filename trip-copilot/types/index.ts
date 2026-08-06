@@ -292,6 +292,14 @@ export interface DocumentStatus {
 
 /* ---------- Poistenie ---------- */
 
+/** Jeden nahraný doklad (fotka alebo PDF), uložený len lokálne ako base64. */
+export interface InsuranceDocument {
+  id: string;
+  name: string;
+  dataUrl: string;
+  isPdf: boolean;
+}
+
 /** Všetko ručne dopĺňané používateľom priamo v appke (lokálne úložisko, nikdy v kóde). */
 export interface InsuranceProfile {
   insurer?: string;
@@ -303,9 +311,8 @@ export interface InsuranceProfile {
   coverageNote?: string;
   assistancePhone?: string;
   emergencyNote?: string;
-  /** Fotka dokladu (napr. PZP certifikát), uložená len lokálne ako base64. */
-  documentDataUrl?: string;
-  documentName?: string;
+  /** Nahraté doklady (fotky, PDF) – zmluva, PZP, prílohy a pod. */
+  documents?: InsuranceDocument[];
 }
 
 /* ---------- Stav aplikácie (lokálne úložisko) ---------- */
