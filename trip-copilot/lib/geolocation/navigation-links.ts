@@ -1,4 +1,4 @@
-import type { LngLat } from '@/types';
+import type { LngLat, Route } from '@/types';
 
 /*
   Vlastnú turn-by-turn navigáciu nerobíme. Navigáciu odovzdávame
@@ -23,4 +23,43 @@ export function appleMapsUrl(coords: LngLat): string {
 
 export function telUrl(phone: string): string {
   return `tel:${phone.replace(/\s+/g, '')}`;
+}
+
+/**
+ * Poskladá odkaz na celú trasu (viac zastávok) do Google Maps z pomenovaných
+ * bodov trasy (Waypoint) naprieč všetkými segmentmi. Google Maps podporuje
+ * max. cca 25 zastávok cez URL – naše trasy majú výrazne menej.
+ */
+export function fullRouteGoogleMapsUrl(route: Route): string {
+  const points = route.segments.flatMap((segment) => segment.waypoints);
+  if (points.length === 0) {
+    // Záloha, keby trasa nemala žiadne pomenované body – použijeme aspoň geometriu.
+    const [start, end] = [route.geometry[0], route.geometry[route.geometry.length - 1]];
+    const origin = `${start[1]},${start[0]}`;
+    const destination = `${end[1]},${end[0]}`;
+    return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
+  }
+
+  const origin = points[0];
+  const destination = points[points.length - 1];
+  const middle = points.slice(1, -1);
+
+  const toLatLng = (p: LngLat) => `${p[1]},${p[0]}`;
+
+  const params = new URLSearchParams({
+    api: '1',
+    origin: toLatLng(origin.coords),
+    destination: toLatLng(destination.coords),
+    travelmode: 'driving',
+  });
+  if (middle.length > 0) {
+    params.set('waypoints', middle.map((p) => toLatLng(p.coords)).join('|'));
+  }
+
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
+/** Otvorí celú trasu (viac zastávok) v Google Maps v novom okne/karte. */
+export function openFullRouteInGoogleMaps(route: Route): void {
+  window.open(fullRouteGoogleMapsUrl(route), '_blank', 'noopener,noreferrer');
 }
