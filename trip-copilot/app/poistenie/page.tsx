@@ -1,7 +1,16 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Camera, Pencil, Phone, ShieldCheck, TriangleAlert } from 'lucide-react';
+import {
+  Camera,
+  ExternalLink,
+  FileText,
+  Pencil,
+  Phone,
+  ShieldCheck,
+  Trash2,
+  TriangleAlert,
+} from 'lucide-react';
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { Card } from '@/components/ui/Card';
 import { Sheet } from '@/components/ui/Sheet';
@@ -9,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { TextField, TextAreaField } from '@/components/ui/Field';
 import { INSURANCE_BASE, INSURANCE_TIPS } from '@/data/insurance';
 import { useAppState } from '@/lib/storage/app-state';
+import type { InsuranceDocument } from '@/types';
 
 type EditableField =
   | 'insurer'
@@ -36,11 +46,17 @@ const FIELD_LABELS: Record<EditableField, string> = {
 /** Polia s dlhším textom dostanú textarea namiesto jednoriadkového vstupu. */
 const LONG_FIELDS: EditableField[] = ['coverageNote', 'emergencyNote'];
 
-/** Fotku dokladu pred uložením zmenšíme, nech si nezaberá zbytočné miesto v úložisku. */
-function compressPhoto(file: File, maxSize = 1400, quality = 0.85): Promise<string> {
+/** Obrázok pred uložením zmenšíme, nech si nezaberá zbytočné miesto v úložisku. PDF necháme tak. */
+function readDocument(file: File, maxSize = 1400, quality = 0.85): Promise<string> {
+  const isPdf = file.type === 'application/pdf';
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
+      if (isPdf) {
+        resolve(reader.result as string);
+        return;
+      }
       const img = new Image();
       img.onload = () => {
         const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
@@ -68,8 +84,10 @@ export default function InsurancePage() {
   const docInputRef = useRef<HTMLInputElement | null>(null);
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   const [draftValue, setDraftValue] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const profile = { ...INSURANCE_BASE, ...state.insuranceOverrides };
+  const documents = profile.documents ?? [];
 
   const openEditor = (field: EditableField) => {
     setEditingField(field);
@@ -82,13 +100,33 @@ export default function InsurancePage() {
     setEditingField(null);
   };
 
-  const onPickDocument = async (file: File) => {
+  const onPickDocuments = async (files: FileList) => {
+    setUploading(true);
     try {
-      const dataUrl = await compressPhoto(file);
-      setInsurance({ documentDataUrl: dataUrl, documentName: file.name });
-    } catch {
-      // Ak sa fotka nepodarí spracovať, jednoducho sa neuloží – nič sa nerozbije.
+      const newDocs: InsuranceDocument[] = [];
+      for (const file of Array.from(files)) {
+        try {
+          const dataUrl = await readDocument(file);
+          newDocs.push({
+            id: `${Date.now()}-${file.name}`,
+            name: file.name,
+            dataUrl,
+            isPdf: file.type === 'application/pdf',
+          });
+        } catch {
+          // Jeden nepodarený súbor nezastaví zvyšok – jednoducho sa preskočí.
+        }
+      }
+      if (newDocs.length > 0) {
+        setInsurance({ documents: [...documents, ...newDocs] });
+      }
+    } finally {
+      setUploading(false);
     }
+  };
+
+  const removeDocument = (id: string) => {
+    setInsurance({ documents: documents.filter((d) => d.id !== id) });
   };
 
   return (
@@ -187,48 +225,75 @@ export default function InsurancePage() {
         </Card>
 
         <Card className="p-4">
-          <p className="eyebrow mb-3">Doklad (napr. PZP certifikát)</p>
-          {profile.documentDataUrl ? (
-            <div className="space-y-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={profile.documentDataUrl}
-                alt="Doklad o poistení"
-                className="w-full rounded-2xl border border-line object-cover"
-              />
-              <Button
-                variant="secondary"
-                full
-                icon={<Camera size={18} />}
-                onClick={() => docInputRef.current?.click()}
-              >
-                Nahradiť fotku
-              </Button>
+          <p className="eyebrow mb-3">Doklady (zmluva, prílohy, PZP...)</p>
+
+          {documents.length > 0 ? (
+            <div className="mb-3 space-y-2">
+              {documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center gap-3 rounded-2xl border border-line p-2"
+                >
+                  {doc.isPdf ? (
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-raised/60 text-muted">
+                      <FileText size={20} />
+                    </span>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={doc.dataUrl}
+                      alt={doc.name}
+                      className="h-11 w-11 shrink-0 rounded-xl border border-line object-cover"
+                    />
+                  )}
+                  <span className="min-w-0 flex-1 truncate text-sm">{doc.name}</span>
+                  <a
+                    href={doc.dataUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    download={doc.name}
+                    className="shrink-0 p-1 text-muted"
+                    aria-label={`Otvoriť ${doc.name}`}
+                  >
+                    <ExternalLink size={17} />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => removeDocument(doc.id)}
+                    className="shrink-0 p-1 text-signal"
+                    aria-label={`Odstrániť ${doc.name}`}
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
+              ))}
             </div>
-          ) : (
-            <Button
-              variant="secondary"
-              full
-              icon={<Camera size={18} />}
-              onClick={() => docInputRef.current?.click()}
-            >
-              Nahrať fotku dokladu
-            </Button>
-          )}
+          ) : null}
+
+          <Button
+            variant="secondary"
+            full
+            icon={<Camera size={18} />}
+            onClick={() => docInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? 'Nahrávam…' : 'Pridať fotku alebo PDF'}
+          </Button>
           <input
             ref={docInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
+            multiple
             className="hidden"
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onPickDocument(file);
+              if (e.target.files && e.target.files.length > 0) onPickDocuments(e.target.files);
               e.target.value = '';
             }}
           />
           <p className="mt-3 text-xs text-muted">
-            Fotka se ukladá len v appke v tomto zariadení, nikam sa neposiela. Originál dokladu
-            radšej maj pre istotu aj v aute.
+            Doklady sa ukladahú len v appke v tomto zariadení, nikam sa neposielajú. Naše osobné
+            doklady (pas, OP) sem netreba – tie ukazujeme naživo. Sem patrí napr. zmluva
+            k cestovnému poisteniu alebo PZP certifikát k autu.
           </p>
         </Card>
 
