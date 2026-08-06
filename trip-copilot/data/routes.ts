@@ -4,17 +4,21 @@ import { haversineKm } from '@/lib/calculations/geo';
 /* =========================================================
    TRASY
    ---------------------------------------------------------
-   POZOR – geometria trasy je ZJEDNODUŠENÁ (predbežné dáta).
-   Ide o lomenú čiaru cez hlavné body diaľnic D1/D2/A4/A2/A23/A4,
-   nie o presnú geometriu z Directions API. Slúži na:
+   Hlavné body (Trnava, Jurki Kopčianska, Alte Reichsstraße/
+   Semmering, M-Rast Zeltweg, ASFINAG Wörthersee, Roccolo/
+   Pagnacco, Lignano; pri ceste späť aj Cardillo Vincenzo a
+   Techelsberg am Wörthersee) sú prevzaté priamo z reálnej,
+   používateľom naplánovanej Google Maps trasy – nie sú to
+   naše odhady. Medzi nimi sú len ľahké spájacie body pre
+   plynulejšiu čiaru na mape, nie o presnú geometriu z
+   Directions API. Slúži na:
      • zákres trasy do mapy,
      • výpočet poradia bodov na trase (čo je pred nami),
      • odhad vzdialenosti od trasy.
    Turn-by-turn navigáciu preberá Google Maps alebo Waze.
 
    TRASA NEVEDIE CEZ SLOVINSKO. Žiadny Maribor, žiadna Ľubľana,
-   žiadna Postojna. Hlavný prejazd: Graz → Klagenfurt → Villach
-   → Tarvisio.
+   žiadna Postojna.
    ========================================================= */
 
 interface PointDef {
@@ -27,58 +31,34 @@ interface PointDef {
 }
 
 const TAM_POINTS: PointDef[] = [
-  { coords: [17.5872, 48.3774], country: 'SK', name: 'Trnava', note: 'Štart – 15. 8. 2026' },
-  { coords: [17.3922, 48.3134], country: 'SK' },
-  { coords: [17.2011, 48.2123], country: 'SK' },
-  { coords: [17.1077, 48.1486], country: 'SK', name: 'Bratislava', note: 'Obchvat D4 / D2' },
-  { coords: [17.0692, 48.0872], country: 'SK', name: 'Kittsee – hranica', note: 'Prechod SK → AT', border: true },
-  { coords: [16.8765, 47.9705], country: 'AT', name: 'Parndorf', note: 'A4, výjazd 43 Neusiedl am See' },
-  { coords: [16.66, 47.9], country: 'AT' },
-  { coords: [16.5316, 47.826], country: 'AT', name: 'Eisenstadt', note: 'B50 cez mesto' },
-  { coords: [16.35, 47.79], country: 'AT' },
-  { coords: [16.2469, 47.8154], country: 'AT', name: 'Wiener Neustadt', note: 'Napojenie na S6' },
-  { coords: [16.09, 47.55], country: 'AT', name: 'Semmering / Wechsel', note: 'S6, horský úsek' },
-  { coords: [15.6, 47.35], country: 'AT', name: 'Bruck an der Mur', note: 'Križovatka S6 na S36' },
-  { coords: [15.0, 47.25], country: 'AT' },
-  { coords: [14.7221, 47.1941], country: 'AT', name: 'Judenburg / Zeltweg', note: 'S36, obchádza Graz' },
-  { coords: [14.5, 47.0], country: 'AT' },
+  { coords: [17.6057394, 48.3887804], country: 'SK', name: 'Trnava', note: 'Štart – 15. 8. 2026 (Priečna 4)' },
+  { coords: [17.0932238, 48.1097319], country: 'SK', name: 'Jurki Kopčianska', note: 'Čerpacia stanica pred hranicou' },
+  { coords: [17.0, 48.03], country: 'AT', name: 'Kittsee – hranica', note: 'Prechod SK → AT', border: true },
+  { coords: [16.1878412, 47.7471286], country: 'AT', name: 'Wiener Neustadt', note: 'Napojenie na S6' },
+  { coords: [15.802547, 47.6236802], country: 'AT', name: 'Alte Reichsstraße (Semmering)', note: 'Vyhliadka na starej ceste cez Semmering' },
+  { coords: [14.7221784, 47.1941492], country: 'AT', name: 'M-Rast Zeltweg', note: 'Odpočívadlo, S36 obchádza Graz' },
   { coords: [14.3661, 46.7686], country: 'AT', name: 'St. Veit an der Glan', note: 'Koniec S37, napojenie na A2' },
   { coords: [14.305, 46.6247], country: 'AT', name: 'Klagenfurt', note: 'Hlavné mesto Korutánska, diaľničný uzol A2' },
-  { coords: [14.15, 46.62], country: 'AT', name: 'Wörthersee', note: 'Odbočka k jazeru' },
+  { coords: [14.0950087, 46.6297031], country: 'AT', name: 'ASFINAG Wörthersee', note: 'Výhľad na jazero' },
   { coords: [13.8558, 46.6103], country: 'AT', name: 'Villach', note: 'Križovatka A2 / A10' },
   { coords: [13.7083, 46.5475], country: 'AT', name: 'Arnoldstein', note: 'Posledné rakúske mesto pred hranicou' },
   { coords: [13.58, 46.505], country: 'IT', name: 'Tarvisio – hranica', note: 'Prechod AT → IT, vstup na talianske mýto', border: true },
-  { coords: [13.376, 46.499], country: 'IT', note: 'Fella valley, A23' },
-  { coords: [13.15, 46.28], country: 'IT' },
-  { coords: [13.12, 46.19], country: 'IT' },
-  { coords: [13.2346, 46.0711], country: 'IT', name: 'Udine', note: 'Križovatka A23 / A4' },
-  { coords: [13.18, 45.9], country: 'IT', note: 'A23 → A4' },
-  { coords: [13.0022, 45.7736], country: 'IT', name: 'Latisana', note: 'Výjazd z A4, platba mýta' },
-  { coords: [13.06, 45.71], country: 'IT' },
+  { coords: [13.1869931, 46.1327421], country: 'IT', name: 'Roccolo (Pagnacco)', note: 'Posledná zastávka pred Lignanom' },
   { coords: [13.1448582, 45.6967665], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Yachting Residence' },
 ];
 
 const SPAT_1_POINTS: PointDef[] = [
   { coords: [13.1448582, 45.6967665], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Checkout 22. 8. 2026 o 9:00' },
-  { coords: [13.06, 45.71], country: 'IT' },
-  { coords: [13.0022, 45.7736], country: 'IT', name: 'Latisana', note: 'Nájazd na A4, lístok pri vstupe' },
-  { coords: [13.18, 45.9], country: 'IT' },
-  { coords: [13.2346, 46.0711], country: 'IT', name: 'Udine', note: 'Križovatka A23 / A4' },
-  { coords: [13.12, 46.19], country: 'IT' },
-  { coords: [13.15, 46.28], country: 'IT' },
-  { coords: [13.376, 46.499], country: 'IT', note: 'Fella valley, A23' },
+  { coords: [13.139766, 45.6900363], country: 'IT', name: 'Cardillo Vincenzo', note: 'Tankovanie pred odchodom' },
   { coords: [13.58, 46.505], country: 'IT', name: 'Tarvisio – hranica', note: 'Prechod IT → AT', border: true },
-  { coords: [13.7083, 46.5475], country: 'AT', name: 'Arnoldstein', note: 'Posledné rakúske mesto pred hranicou' },
   { coords: [13.8558, 46.6103], country: 'AT', name: 'Villach', note: 'Križovatka A2 / A10' },
-  { coords: [14.15, 46.62], country: 'AT', name: 'Wörthersee', note: 'Odbočka k jazeru' },
+  { coords: [14.0953451, 46.6296179], country: 'AT', name: 'Techelsberg am Wörthersee', note: 'Odpočinok pri jazere' },
   { coords: [14.305, 46.6247], country: 'AT', name: 'Klagenfurt', note: 'Hlavné mesto Korutánska, diaľničný uzol A2' },
-  { coords: [14.8, 46.95], country: 'AT' },
-  { coords: [15.28, 47.08], country: 'AT', name: 'Weiz / Gleisdorf', note: 'Obchádza Graz z východu' },
-  { coords: [15.4395, 47.0707], country: 'AT', name: 'Graz alebo okolie', note: 'Nocľah 22. – 23. 8. 2026' },
+  { coords: [15.4417305, 47.0678961], country: 'AT', name: 'Graz alebo okolie', note: 'Nocľah 22. – 23. 8. 2026' },
 ];
 
 const SPAT_2_POINTS: PointDef[] = [
-  { coords: [15.4395, 47.0707], country: 'AT', name: 'Graz alebo okolie', note: 'Odchod 23. 8. 2026' },
+  { coords: [15.4417305, 47.0678961], country: 'AT', name: 'Graz alebo okolie', note: 'Odchod 23. 8. 2026' },
   { coords: [15.8, 47.05], country: 'AT' },
   { coords: [16.08, 47.05], country: 'AT', name: 'Fürstenfeld', note: 'Napojenie na S31' },
   { coords: [16.33, 47.28], country: 'AT', name: 'Oberwart', note: 'S31, Burgenland' },
@@ -136,10 +116,10 @@ export const CESTA_TAM: Route = (() => {
       order: 1,
       from: 'Trnava',
       to: 'Lignano Sabbiadoro',
-      distanceKm: 636,
-      drivingMinutes: 401,
+      distanceKm: 659,
+      drivingMinutes: 442,
       description:
-        'Trnava → Bratislava → Parndorf/Eisenstadt (Burgenland) → Wiener Neustadt → S6 Semmering → Judenburg/Zeltweg (S36, obchádza Graz) → Klagenfurt → Villach → Tarvisio → Udine → Latisana → Lignano. Trasa nevedie cez Slovinsko.',
+        'Trnava → Jurki Kopčianska (Bratislava) → Wiener Neustadt → Semmering (Alte Reichsstraße) → M-Rast Zeltweg → St. Veit → Klagenfurt → ASFINAG Wörthersee → Villach → Arnoldstein → Tarvisio → Roccolo (Pagnacco) → Lignano. Reálna trasa naplánovaná v Google Maps, nevedie cez Slovinsko.',
     },
     TAM_POINTS,
   );
@@ -148,8 +128,8 @@ export const CESTA_TAM: Route = (() => {
     id: 'cesta-tam',
     name: 'Cesta tam',
     direction: 'tam',
-    distanceKm: 636,
-    drivingMinutes: 401,
+    distanceKm: 659,
+    drivingMinutes: 442,
     segments: [segment],
     geometry: segment.geometry,
   };
@@ -166,9 +146,10 @@ export const CESTA_SPAT: Route = (() => {
       order: 1,
       from: 'Lignano Sabbiadoro',
       to: 'Graz alebo okolie',
-      distanceKm: 376,
-      drivingMinutes: 242,
-      description: 'Checkout o 9:00, prejazd cez Tarvisio, Villach a Wörthersee do okolia Grazu na jednu noc.',
+      distanceKm: 368,
+      drivingMinutes: 246,
+      description:
+        'Checkout o 9:00, tankovanie v Lignane, prejazd cez Tarvisio, Villach a Techelsberg am Wörthersee do okolia Grazu na jednu noc. Reálna trasa naplánovaná v Google Maps.',
     },
     SPAT_1_POINTS,
   );
