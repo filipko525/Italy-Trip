@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Cat, Clock, CornerUpRight, LocateFixed, MapPin, TriangleAlert } from 'lucide-react';
+import { Cat, Clock, CornerUpRight, LocateFixed, MapPin, Navigation, TriangleAlert } from 'lucide-react';
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { RouteMap } from '@/components/map/RouteMap';
 import { MapFallback } from '@/components/map/MapFallback';
@@ -13,6 +13,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { useAppState } from '@/lib/storage/app-state';
 import { usePoisAhead } from '@/hooks/usePoisAhead';
 import { hasMapbox } from '@/lib/mapbox/config';
+import { openFullRouteInGoogleMaps } from '@/lib/geolocation/navigation-links';
 import { formatKm, formatMinutes } from '@/lib/calculations/geo';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
 import type { PoiWithGeoContext } from '@/types';
@@ -79,6 +80,21 @@ export default function MapaPage() {
         >
           Cesta späť
         </Chip>
+      </div>
+
+      <div className="px-4 pb-3">
+        <Button
+          size="lg"
+          full
+          icon={<Navigation size={20} />}
+          onClick={() => openFullRouteInGoogleMaps(route)}
+        >
+          Otvoriť v Google Maps
+        </Button>
+        <p className="mt-1.5 px-1 text-xs text-muted">
+          Spustí sa appka Google Maps s celou trasou ({route.name}). Ak appku nemáš, otvorí sa
+          webová verzia.
+        </p>
       </div>
 
       {overnightWaypoint ? (
