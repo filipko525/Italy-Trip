@@ -26,40 +26,20 @@ export function telUrl(phone: string): string {
 }
 
 /**
- * Poskladá odkaz na celú trasu (viac zastávok) do Google Maps z pomenovaných
- * bodov trasy (Waypoint) naprieč všetkými segmentmi. Google Maps podporuje
- * max. cca 25 zastávok cez URL – naše trasy majú výrazne menej.
+ * Odkaz na trasu do Google Maps – zámerne len štart a cieľ, žiadne vynútené
+ * medzizastávky. Naše súradnice bodov na trase sú len približné (nie presná
+ * geometria z Directions API), takže keď by sme Google Maps nimi nútili
+ * prechádzať, vie to paradoxne vybrať HORŠIU trasu, než keby sme mu len
+ * povedali odkiaľ-kam a nechali ho nájsť skutočne najlepšiu cestu sám.
  */
 export function fullRouteGoogleMapsUrl(route: Route): string {
-  const points = route.segments.flatMap((segment) => segment.waypoints);
-  if (points.length === 0) {
-    // Záloha, keby trasa nemala žiadne pomenované body – použijeme aspoň geometriu.
-    const [start, end] = [route.geometry[0], route.geometry[route.geometry.length - 1]];
-    const origin = `${start[1]},${start[0]}`;
-    const destination = `${end[1]},${end[0]}`;
-    return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
-  }
-
-  const origin = points[0];
-  const destination = points[points.length - 1];
-  const middle = points.slice(1, -1);
-
-  const toLatLng = (p: LngLat) => `${p[1]},${p[0]}`;
-
-  const params = new URLSearchParams({
-    api: '1',
-    origin: toLatLng(origin.coords),
-    destination: toLatLng(destination.coords),
-    travelmode: 'driving',
-  });
-  if (middle.length > 0) {
-    params.set('waypoints', middle.map((p) => toLatLng(p.coords)).join('|'));
-  }
-
-  return `https://www.google.com/maps/dir/?${params.toString()}`;
+  const [start, end] = [route.geometry[0], route.geometry[route.geometry.length - 1]];
+  const origin = `${start[1]},${start[0]}`;
+  const destination = `${end[1]},${end[0]}`;
+  return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
 }
 
-/** Otvorí celú trasu (viac zastávok) v Google Maps v novom okne/karte. */
+/** Otvorí celú trasu v Google Maps v novom okne/karte. */
 export function openFullRouteInGoogleMaps(route: Route): void {
   window.open(fullRouteGoogleMapsUrl(route), '_blank', 'noopener,noreferrer');
 }
