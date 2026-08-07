@@ -3,16 +3,12 @@ import type { CountryCode, LngLat, PoiCategory, PointOfInterest, RouteDirection 
 /* =========================================================
    BODY ZÁUJMU (POI)
    ---------------------------------------------------------
-   Zámerne štíhly zoznam – žiadne testovacie výplne. Namiesto
-   desiatok mock bodov na každom úseku sú tu len:
-     1) miesto na dotankovanie pri Bratislave (lacnejšia nafta),
-     2) reálne, overené ASFINAG/Autogrill odpočívadlá po celej
-        trase cez Rakúsko a Taliansko – bezpečnostné prestávky
-        po cca 1,5–2 h jazdy,
-     3) čerpačka v Lignane na dotankovanie pred cestou domov.
-   Súradnice a názvy sú overené (Google Places), nie vymyslené.
-   Presné otváracie hodiny reštaurácií/obchodov v nich sa menia,
-   samotné odpočívadlá a čerpačky sú ale nonstop.
+   Hlavné zastávky sú priamo z reálnej, používateľom naplánovanej
+   trasy v Google Maps (nie naše odhady). K nim je doplnených
+   pár overených ASFINAG odpočívadiel na trase pre bezpečnostné
+   prestávky. Súradnice a názvy sú overené (Google Places/Maps),
+   nie vymyslené. Presné otváracie hodiny reštaurácií/obchodov
+   v nich sa menia, samotné odpočívadlá a čerpačky sú ale nonstop.
    ========================================================= */
 
 export const POI_CATEGORY_LABELS: Record<PoiCategory, string> = {
@@ -56,14 +52,14 @@ const poi = (input: PoiInput): PointOfInterest => ({
 });
 
 export const POINTS_OF_INTEREST: PointOfInterest[] = [
-  /* --- Dotankovanie pri Bratislave --- */
+  /* --- Dotankovanie pri Bratislave (len cesta tam) --- */
   poi({
     id: 'ba-pumpa',
     name: 'Jurki Kopčianska',
     category: 'pumpa',
     region: 'Bratislava',
     country: 'SK',
-    coords: [17.0931402, 48.1097626],
+    coords: [17.0932238, 48.1097319],
     detourMinutes: 3,
     stopMinutes: 10,
     catFriendly: true,
@@ -72,25 +68,7 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     directions: ['tam'],
   }),
 
-  /* --- Rakúsko: A4 pri Parndorfe (len cesta tam, cez Burgenland) --- */
-  poi({
-    id: 'at-parndorf',
-    name: 'ASFINAG Rastplatz Parndorf',
-    category: 'odpocivadlo',
-    region: 'Parndorf',
-    country: 'AT',
-    coords: [16.876542, 47.9705306],
-    detourMinutes: 0,
-    stopMinutes: 15,
-    catFriendly: true,
-    shade: false,
-    quiet: false,
-    openingHours: 'nonstop',
-    note: 'Prvá rakúska zastávka na trase tam (cesta späť ide inadiaľ). Veľké parkovisko, sprchy aj WC zdarma.',
-    directions: ['tam'],
-  }),
-
-  /* --- Rakúsko: A2 Wiener Neustadt --- */
+  /* --- Rakúsko: A2 Wiener Neustadt (len cesta tam) --- */
   poi({
     id: 'at-wn',
     name: 'ASFINAG Rastplatz Wiener Neustadt',
@@ -108,21 +86,20 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     directions: ['tam'],
   }),
 
-  /* --- Rakúsko: Wechsel/Zöbern --- */
+  /* --- Rakúsko: vyhliadka na starej ceste cez Semmering (len cesta tam) --- */
   poi({
-    id: 'at-zobern',
-    name: 'ASFINAG Raststation Zöbern',
-    category: 'odpocivadlo',
-    region: 'Semmering / Wechsel',
+    id: 'at-semmering',
+    name: 'Alte Reichsstraße (Semmering)',
+    category: 'vyhliadka',
+    region: 'Steinhaus am Semmering',
     country: 'AT',
-    coords: [16.1167721, 47.5427097],
-    detourMinutes: 0,
+    coords: [15.802547, 47.6236802],
+    detourMinutes: 2,
     stopMinutes: 15,
     catFriendly: true,
-    shade: true,
+    shade: false,
     quiet: true,
-    openingHours: 'nonstop',
-    note: 'Čerpačka Shell priamo na mieste, pekný výhľad na hory. Podľa recenzií obľúbená prestávka na trase Viedeň–Graz.',
+    note: 'Vyhliadkový bod na historickej ceste cez Semmering – náš vlastný, overený bod z reálnej trasy. Pekné miesto na krátke pretiahnutie nôh a fotku.',
     directions: ['tam'],
   }),
 
@@ -140,7 +117,7 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     shade: true,
     quiet: false,
     openingHours: 'nonstop',
-    note: 'Približne polovica trasy tam. Skvele hodnotené (reštaurácia, sprchy, WC zdarma, aj Tesla supercharger). Cesta späť ide inou vetvou, tadiaľto nejde.',
+    note: 'Približne polovica trasy tam. Skvele hodnotené (reštaurácia, sprchy, WC zdarma, aj Tesla supercharger).',
     directions: ['tam'],
   }),
 
@@ -159,6 +136,7 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     quiet: false,
     openingHours: 'nonstop',
     note: 'Najkrajší výhľad na trase – priamo nad jazerom Wörthersee. WC je tu spoplatnené (v cene je bloček na nákup). Cez deň býva plno.',
+    directions: ['tam'],
   }),
 
   /* --- Rakúsko: Arnoldstein, posledná zastávka pred hranicou --- */
@@ -178,41 +156,22 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     note: 'Posledná rakúska zastávka pred vstupom do Talianska. Pokojné miesto pri rieke, podľa recenzií bezpečná a čisté.',
   }),
 
-  /* --- Taliansko: hneď po hranici pri Tarvisiu --- */
+  /* --- Taliansko: Roccolo pri Pagnacco, posledná zastávka pred Lignanom (len cesta tam) --- */
   poi({
-    id: 'it-tarvisio',
-    name: 'Autogrill Fella Est',
+    id: 'it-pagnacco',
+    name: 'Roccolo (Pagnacco)',
     category: 'odpocivadlo',
-    region: 'Tarvisio',
+    region: 'Pagnacco (Udine)',
     country: 'IT',
-    coords: [13.3756631, 46.4985707],
-    detourMinutes: 0,
+    coords: [13.1869931, 46.1327421],
+    detourMinutes: 2,
     stopMinutes: 15,
     catFriendly: true,
-    shade: false,
-    quiet: false,
-    openingHours: 'nonstop',
-    note: 'Prvý taliansky Autogrill po hranici, hneď za Tarvisiom (A23). Čerstvé pečivo, dobrá káva, aj drobný nákup talianskych vecí.',
+    note: 'Náš vlastný, overený bod z reálnej trasy – posledná zastávka pred Lignanom, tesne za Vami.',
+    directions: ['tam'],
   }),
 
-  /* --- Taliansko: pri Udine --- */
-  poi({
-    id: 'it-udine',
-    name: 'Sarni Ledra Ovest',
-    category: 'odpocivadlo',
-    region: 'Udine',
-    country: 'IT',
-    coords: [13.1192888, 46.1858914],
-    detourMinutes: 0,
-    stopMinutes: 15,
-    catFriendly: true,
-    shade: true,
-    quiet: false,
-    openingHours: 'nonstop',
-    note: 'Poobede tu býva horúco – posledná bezpečná prestávka pred zjazdom na Latisanu/Lignano. WC aj sprchy.',
-  }),
-
-  /* --- Lignano: dotankovanie pred cestou domov --- */
+  /* --- Lignano: dotankovanie pred cestou domov (len cesta späť) --- */
   poi({
     id: 'li-pumpa',
     name: 'Cardillo Vincenzo',
@@ -223,7 +182,24 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     detourMinutes: 5,
     stopMinutes: 15,
     catFriendly: true,
-    note: 'Priamo na ceste smer Latisana, teda presne v smere odchodu domov. Podľa recenzií ochotná obsluha. Natankuj tu 22. 8. pred odchodom.',
+    note: 'Priamo na ceste smer Tarvisio, teda presne v smere odchodu domov. Podľa recenzií ochotná obsluha. Natankuj tu 22. 8. pred odchodom.',
+    directions: ['spat'],
+  }),
+
+  /* --- Rakúsko: Techelsberg am Wörthersee (len cesta späť) --- */
+  poi({
+    id: 'at-techelsberg',
+    name: 'Techelsberg am Wörthersee',
+    category: 'vyhliadka',
+    region: 'Wörthersee',
+    country: 'AT',
+    coords: [14.0953451, 46.6296179],
+    detourMinutes: 2,
+    stopMinutes: 30,
+    catFriendly: true,
+    shade: true,
+    quiet: true,
+    note: 'Náš vlastný bod z reálnej trasy späť – pekné miesto pri jazere na dlhšiu prestávku, kým sa cestou pokračuje na nocľah do Grazu.',
     directions: ['spat'],
   }),
 ];
