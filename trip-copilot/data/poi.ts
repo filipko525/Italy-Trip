@@ -24,6 +24,7 @@ export const POI_CATEGORY_LABELS: Record<PoiCategory, string> = {
   veterina: 'Veterina',
   pet: 'Pet-friendly zastávka',
   pokoj: 'Pokojné miesto so Sumi',
+  noclah: 'Nocľah',
 };
 
 interface PoiInput {
