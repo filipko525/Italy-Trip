@@ -60,7 +60,7 @@ export const CHECKLISTS: Checklist[] = [
 
 export const CONTACTS = [
   { id: 'k-1', label: 'Tiesňová linka (EU)', value: '112', note: 'Platí v SK, AT aj IT' },
-  { id: 'k-2', label: 'Asistenčná služba poisťovne', value: 'doplniť', note: 'Číslo z poistnej zmluvy' },
+  { id: 'k-2', label: 'Asistenčná služba poisťovne', value: '+420296339644', note: 'Union / Eurocross Assistance, 24/7, aj zo zahraničia' },
   { id: 'k-3', label: 'Yachting Residence', value: '+39 334 908 5534', note: 'Delegátka Mária Matiščíková' },
   { id: 'k-4', label: 'Ubytovanie v Rakúsku', value: 'doplniť', note: 'Po výbere ubytovania' },
   { id: 'k-5', label: 'Náš veterinár doma', value: 'doplniť' },
