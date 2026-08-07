@@ -353,4 +353,9 @@ export interface AppState {
   };
   /** Ručne doplnené údaje o poistení (zmluva, vozidlo, asistencia) a fotka dokladu. */
   insuranceOverrides: InsuranceProfile;
+  /** Ručné úpravy ubytovania (najmä ešte nevybraný nocľah v Rakúsku) – kľúč je Accommodation.id. */
+  accommodationOverrides: Record<
+    string,
+    Partial<Pick<Accommodation, 'name' | 'address' | 'checkIn' | 'notes' | 'status'>>
+  >;
 }
