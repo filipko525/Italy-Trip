@@ -16,7 +16,7 @@ export const PLAN: PlanItem[] = [
     id: 'p-2',
     date: '2026-08-15',
     title: 'Cesta do Lignana',
-    detail: '636 km, čistý čas jazdy približne 6 h 41 min. S prestávkami počítaj skôr s 9 hodinami.',
+    detail: '659 km, čistý čas jazdy približne 7 h 22 min (aj so zastávkami). Reálna trasa naplánovaná v Google Maps.',
     kind: 'jazda',
   },
   {
@@ -53,7 +53,7 @@ export const PLAN: PlanItem[] = [
     id: 'p-7',
     date: '2026-08-22',
     title: 'Cesta smer Rakúsko',
-    detail: 'Lignano → Latisana → Udine → Tarvisio → Villach → Wörthersee → Weiz/Gleisdorf → Graz alebo okolie. Približne 376 km.',
+    detail: 'Lignano → Cardillo Vincenzo (tankovanie) → Tarvisio → Villach → Techelsberg am Wörthersee → Graz alebo okolie. Približne 368 km.',
     kind: 'jazda',
   },
   {
