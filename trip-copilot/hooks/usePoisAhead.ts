@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { PoiCategory, PoiWithGeoContext } from '@/types';
+import type { PoiCategory, PoiWithGeoContext, PointOfInterest } from '@/types';
 import { POINTS_OF_INTEREST } from '@/data/poi';
+import { ACCOMMODATIONS } from '@/data/accommodations';
 import { useTripPosition, type TripPosition } from '@/hooks/useTripPosition';
 import { useAppState } from '@/lib/storage/app-state';
 import {
@@ -52,9 +53,53 @@ export function usePoisAhead(filters: AheadFilters = DEFAULT_FILTERS): {
     const scaler = makeRouteScaler(route.geometry, route.distanceKm);
     const direction = state.settings.direction;
 
-    return POINTS_OF_INTEREST.filter(
+    const basePois = POINTS_OF_INTEREST.filter(
       (poi) => !poi.directions || poi.directions.includes(direction),
-    ).map((poi) => {
+    );
+
+    // Nocľah v Rakúsku (len cesta späť) nie je v POINTS_OF_INTEREST, lebo je
+    // to živý, editovateľný bod (jeho adresa sa mení, keď si používateľ
+    // vyberie/doplní ubytovanie). Syntetizujeme ho tu, nech sa objaví ako
+    // reálna zastávka aj na obrazovke Pred nami, nielen ako banner na mape.
+    const overnightPoi: PointOfInterest | null = (() => {
+      if (direction !== 'spat') return null;
+      let waypoint = null;
+      for (const seg of route.segments) {
+        const wp = seg.waypoints.find((w) => w.note?.includes('Nocľah'));
+        if (wp) {
+          waypoint = wp;
+          break;
+        }
+      }
+      if (!waypoint) return null;
+
+      const austriaBase = ACCOMMODATIONS.find((a) => a.id === 'acc-austria');
+      const override = state.accommodationOverrides['acc-austria'];
+      const isConfirmed = override?.status === 'potvrdene';
+
+      return {
+        id: 'acc-austria-stop',
+        name: isConfirmed && override?.name ? override.name : waypoint.name,
+        category: 'noclah',
+        region: 'Rakúsko',
+        country: 'AT',
+        coords: waypoint.coords,
+        detourMinutes: 0,
+        stopMinutes: 0,
+        catFriendly: true,
+        parking: true,
+        isMockData: false,
+        note:
+          isConfirmed && override?.address
+            ? override.address
+            : (waypoint.note ?? austriaBase?.notes),
+        directions: ['spat'],
+      };
+    })();
+
+    const withOvernight = overnightPoi ? [...basePois, overnightPoi] : basePois;
+
+    return withOvernight.map((poi) => {
       const projection = projectOntoRoute(route.geometry, poi.coords, scaler.cumulative);
       const routeProgressKm = scaler.toRouteKm(projection.progressKm);
       const distanceAlongRoute = routeProgressKm - progressKm;
