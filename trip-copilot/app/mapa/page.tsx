@@ -44,7 +44,7 @@ export default function MapaPage() {
   const [online, setOnline] = useState(true);
   const [selectedPoi, setSelectedPoi] = useState<PoiWithGeoContext | null>(null);
   const [editingGraz, setEditingGraz] = useState(false);
-  const [grazDraft, setGrazDraft] = useState({ name: '', address: '', checkIn: '', notes: '' });
+  const [grazDraft, setGrazDraft] = useState({ name: '', address: '', phone: '', checkIn: '', notes: '' });
   const nextStop = all.find((p) => p.isAhead && !state.visitedPoiIds.includes(p.id)) ?? null;
 
   const austriaBase = ACCOMMODATIONS.find((a) => a.id === 'acc-austria');
@@ -153,6 +153,7 @@ export default function MapaPage() {
             setGrazDraft({
               name: austriaStay?.status !== 'nevybrane' ? austriaStay?.name ?? '' : '',
               address: austriaStay?.status !== 'nevybrane' ? austriaStay?.address ?? '' : '',
+              phone: austriaStay?.phone ?? '',
               checkIn: austriaStay?.checkIn ?? '',
               notes: austriaStay?.notes ?? '',
             });
@@ -418,6 +419,12 @@ export default function MapaPage() {
             placeholder="Ulica, mesto, Rakúsko"
           />
           <TextField
+            label="Telefón na recepciu"
+            value={grazDraft.phone}
+            onChange={(e) => setGrazDraft((d) => ({ ...d, phone: e.target.value }))}
+            placeholder="+43 ..."
+          />
+          <TextField
             label="Kedy prichádzame"
             value={grazDraft.checkIn}
             onChange={(e) => setGrazDraft((d) => ({ ...d, checkIn: e.target.value }))}
@@ -435,6 +442,7 @@ export default function MapaPage() {
               setAccommodation('acc-austria', {
                 name: grazDraft.name.trim() || undefined,
                 address: grazDraft.address.trim() || undefined,
+                phone: grazDraft.phone.trim() || undefined,
                 checkIn: grazDraft.checkIn.trim() || undefined,
                 notes: grazDraft.notes.trim() || undefined,
                 status: grazDraft.name.trim() || grazDraft.address.trim() ? 'potvrdene' : 'nevybrane',
@@ -446,7 +454,7 @@ export default function MapaPage() {
           </Button>
           <p className="text-xs text-muted">
             Adresu potom appka použije aj ako cieľ v tlačidle &quot;Otvoriť v Google Maps&quot; pre
-            cestu späť.
+            cestu späť, telefón sa zobrazí aj v Dôležitých kontaktoch na Pláne.
           </p>
         </div>
       </Sheet>
