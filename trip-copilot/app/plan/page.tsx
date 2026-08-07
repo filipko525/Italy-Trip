@@ -159,7 +159,9 @@ export default function PlanPage() {
         <Collapsible title="Dôležité kontakty" summary="112 platí v SK, AT aj IT">
           <ul className="divide-y divide-line/60">
             {CONTACTS.map((c) => {
-              const missing = c.value === 'doplniť';
+              const value =
+                c.id === 'k-4' ? state.accommodationOverrides['acc-austria']?.phone ?? c.value : c.value;
+              const missing = value === 'doplniť';
               return (
                 <li key={c.id} className="flex items-center justify-between gap-3 py-3">
                   <div>
@@ -170,10 +172,10 @@ export default function PlanPage() {
                     <Tag tone="signal">doplniť</Tag>
                   ) : (
                     <a
-                      href={`tel:${c.value}`}
+                      href={`tel:${value}`}
                       className="inline-flex items-center gap-1.5 rounded-pill bg-sea px-3 py-2 text-sm font-medium text-white"
                     >
-                      <Phone size={15} /> {c.value}
+                      <Phone size={15} /> {value}
                     </a>
                   )}
                 </li>
