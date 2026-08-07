@@ -22,6 +22,9 @@ import type { PoiWithGeoContext } from '@/types';
     geometrie, nech Google Maps nájde presne tú istú trasu ako v reálnom živote. */
 const HOME_ADDRESS = 'Priečna 4, 917 01 Trnava';
 const LIGNANO_ADDRESS = 'Viale Italia 70, 33054 Lignano Sabbiadoro, Taliansko';
+/** Cesta späť má zatiaľ naplánovaný a overený len prvý deň (do Grazu na nocľah) –
+    úsek Graz → domov ešte nie je finálny, preto ho do Google Maps odkazu nedávame. */
+const GRAZ_ADDRESS = 'Graz, Rakúsko';
 
 export default function MapaPage() {
   const { state, setSettings, setTravel } = useAppState();
@@ -60,7 +63,7 @@ export default function MapaPage() {
     () =>
       direction === 'tam'
         ? { originAddress: HOME_ADDRESS, destinationAddress: LIGNANO_ADDRESS }
-        : { originAddress: LIGNANO_ADDRESS, destinationAddress: HOME_ADDRESS },
+        : { originAddress: LIGNANO_ADDRESS, destinationAddress: GRAZ_ADDRESS },
     [direction],
   );
 
