@@ -108,8 +108,8 @@ export default function HomePage() {
             href="/mapa"
             icon={<RouteIcon size={18} />}
             eyebrow="Trasa tam"
-            title="636 km"
-            detail="Trnava → Lignano, cez Judenburg a Tarvisio"
+            title="659 km"
+            detail="Trnava → Lignano, cez Semmering a Wörthersee"
           />
           <HomeCard
             href="/plan"
@@ -163,6 +163,20 @@ export default function HomePage() {
           Body záujmu v aplikácii sú zatiaľ testovacie dáta. Navigáciu preberá Google Maps alebo
           Waze – táto aplikácia je copilot, nie navigácia. Vodič ju neovláda počas jazdy.
         </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirm('Appka ťa odhlási – nabudúce bude znova pýtať meno a heslo. Pokračovať?')) {
+              return;
+            }
+            const { protocol, host } = window.location;
+            window.location.href = `${protocol}//odhlasenie:odhlasenie@${host}/`;
+          }}
+          className="px-1 pb-4 text-xs text-muted underline underline-offset-2"
+        >
+          Odhlásiť sa (napr. pred odovzdaním telefónu na testovanie)
+        </button>
       </div>
     </main>
   );
