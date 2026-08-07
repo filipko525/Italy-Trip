@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -29,12 +30,22 @@ import { Tag } from '@/components/ui/Chip';
 
 export default function HomePage() {
   const router = useRouter();
-  const { state, setTravel } = useAppState();
+  const { state, setTravel, setSettings } = useAppState();
   const position = useTripPosition();
+
+  // Cesta tam má byť vždy prioritná pri otvorení appky – ak nie sme práve
+  // v aktívnom cestovnom režime, domovská obrazovka smer potichu resetuje.
+  useEffect(() => {
+    if (!state.travel.active && state.settings.direction !== 'tam') {
+      setSettings({ direction: 'tam' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const days = daysUntil(TRIP.departureDate);
   const lignano = ACCOMMODATIONS[0];
   const austria = ACCOMMODATIONS[1];
+  const austriaStay = { ...austria, ...state.accommodationOverrides['acc-austria'] };
 
   const sumiItems = [...SUMI_DOCS_CHECKLIST.items, ...SUMI_GEAR_CHECKLIST.items];
   const sumiDone = sumiItems.filter((i) => state.checkedItems[i.id]).length;
@@ -142,12 +153,16 @@ export default function HomePage() {
             warn="predbežné"
           />
           <HomeCard
-            href="/plan"
+            href="/mapa"
             icon={<BedDouble size={18} />}
             eyebrow="Rakúsky nocľah"
-            title={austria.name}
-            detail="22. – 23. 8., Graz alebo okolie, do 100 €"
-            warn="doplniť"
+            title={austriaStay.name}
+            detail={
+              austriaStay.status !== 'nevybrane' && austriaStay.address
+                ? austriaStay.address
+                : '22. – 23. 8., Graz alebo okolie, do 100 €'
+            }
+            warn={austriaStay.status === 'nevybrane' ? 'doplniť' : undefined}
           />
           <HomeCard
             href="/plan"
