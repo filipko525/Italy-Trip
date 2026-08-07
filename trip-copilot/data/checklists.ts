@@ -64,6 +64,6 @@ export const CONTACTS = [
   { id: 'k-3', label: 'Yachting Residence', value: '+39 334 908 5534', note: 'Delegátka Mária Matiščíková' },
   { id: 'k-4', label: 'Ubytovanie v Rakúsku', value: 'doplniť', note: 'Po výbere ubytovania' },
   { id: 'k-5', label: 'Náš veterinár doma', value: 'doplniť' },
-  { id: 'k-6', label: 'Veterina v Lignane', value: 'doplniť', note: 'Nájspť po príchode' },
+  { id: 'k-6', label: 'Veterina v Lignane', value: '+393487077960', note: 'Dr. Bidin Roberto, Viale Europa 6 – skvele hodnotený, skúsenosť aj s mačkami, hovorí po nemecky' },
   { id: 'k-7', label: 'Blokovanie kariet', value: 'doplniť', note: 'Číslo banky' },
 ];
