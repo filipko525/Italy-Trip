@@ -65,7 +65,13 @@ export function PoiCard({
           <div className="flex items-center gap-2">
             <Clock size={15} className="text-muted" />
             <span>
-              zastávka <span className="tnum font-medium">{poi.stopMinutes} min</span>
+              {poi.category === 'noclah' ? (
+                <span className="tnum font-medium">cez noc</span>
+              ) : (
+                <>
+                  zastávka <span className="tnum font-medium">{poi.stopMinutes} min</span>
+                </>
+              )}
             </span>
           </div>
           <div className="flex items-center gap-2">
