@@ -1,7 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Cat, Clock, CornerUpRight, LocateFixed, MapPin, Navigation, TriangleAlert } from 'lucide-react';
+import {
+  Cat,
+  Clock,
+  CornerUpRight,
+  LocateFixed,
+  MapPin,
+  Navigation,
+  Pencil,
+  TriangleAlert,
+} from 'lucide-react';
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { RouteMap } from '@/components/map/RouteMap';
 import { MapFallback } from '@/components/map/MapFallback';
@@ -10,12 +19,14 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Chip, Tag } from '@/components/ui/Chip';
 import { Sheet } from '@/components/ui/Sheet';
+import { TextField, TextAreaField } from '@/components/ui/Field';
 import { useAppState } from '@/lib/storage/app-state';
 import { usePoisAhead } from '@/hooks/usePoisAhead';
 import { hasMapbox } from '@/lib/mapbox/config';
 import { openFullRouteInGoogleMaps } from '@/lib/geolocation/navigation-links';
 import { formatKm, formatMinutes } from '@/lib/calculations/geo';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
+import { ACCOMMODATIONS } from '@/data/accommodations';
 import type { PoiWithGeoContext } from '@/types';
 
 /** Presné adresy pre Google Maps odkaz – nie súradnice z našej zjednodušenej
@@ -27,12 +38,19 @@ const LIGNANO_ADDRESS = 'Viale Italia 70, 33054 Lignano Sabbiadoro, Taliansko';
 const GRAZ_ADDRESS = 'Graz, Rakúsko';
 
 export default function MapaPage() {
-  const { state, setSettings, setTravel } = useAppState();
+  const { state, setSettings, setTravel, setAccommodation } = useAppState();
   const { position, all } = usePoisAhead();
   const [dark, setDark] = useState(false);
   const [online, setOnline] = useState(true);
   const [selectedPoi, setSelectedPoi] = useState<PoiWithGeoContext | null>(null);
+  const [editingGraz, setEditingGraz] = useState(false);
+  const [grazDraft, setGrazDraft] = useState({ name: '', address: '', checkIn: '', notes: '' });
   const nextStop = all.find((p) => p.isAhead && !state.visitedPoiIds.includes(p.id)) ?? null;
+
+  const austriaBase = ACCOMMODATIONS.find((a) => a.id === 'acc-austria');
+  const austriaStay = austriaBase
+    ? { ...austriaBase, ...state.accommodationOverrides['acc-austria'] }
+    : null;
 
   useEffect(() => {
     const read = () => setDark(document.documentElement.dataset.theme === 'dark');
@@ -58,13 +76,21 @@ export default function MapaPage() {
     [position.route, state.settings.direction],
   );
 
-  /** Presný štart/cieľ pre Google Maps – adresa, nie súradnice z geometrie. */
+  /** Cesta späť má zatiaľ naplánovaný a overený len prvý deň (do Grazu na nocľah) –
+      úsek Graz → domov ešte nie je finálny. Ako cieľ v Google Maps použijeme skutočnú
+      adresu ubytovania, ak je už doplnená, inak len všeobecné "Graz, Rakúsko". */
   const { originAddress, destinationAddress } = useMemo(
     () =>
       direction === 'tam'
         ? { originAddress: HOME_ADDRESS, destinationAddress: LIGNANO_ADDRESS }
-        : { originAddress: LIGNANO_ADDRESS, destinationAddress: GRAZ_ADDRESS },
-    [direction],
+        : {
+            originAddress: LIGNANO_ADDRESS,
+            destinationAddress:
+              austriaStay && austriaStay.status !== 'nevybrane' && austriaStay.address
+                ? austriaStay.address
+                : GRAZ_ADDRESS,
+          },
+    [direction, austriaStay],
   );
 
   /** Nocľah cestou (len smer späť) – nájdeme bod trasy s poznámkou o nocľahu, nech je
@@ -121,11 +147,37 @@ export default function MapaPage() {
       </div>
 
       {overnightWaypoint ? (
-        <div className="mx-4 mb-3 rounded-2xl bg-signal/12 p-3">
-          <p className="eyebrow text-signal">Nocľah cestou</p>
-          <p className="mt-0.5 font-semibold leading-snug">{overnightWaypoint.name}</p>
-          <p className="mt-0.5 text-sm text-muted">{overnightWaypoint.note}</p>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setGrazDraft({
+              name: austriaStay?.status !== 'nevybrane' ? austriaStay?.name ?? '' : '',
+              address: austriaStay?.status !== 'nevybrane' ? austriaStay?.address ?? '' : '',
+              checkIn: austriaStay?.checkIn ?? '',
+              notes: austriaStay?.notes ?? '',
+            });
+            setEditingGraz(true);
+          }}
+          className="mx-4 mb-3 block w-[calc(100%-2rem)] rounded-2xl bg-signal/12 p-3 text-left"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p className="eyebrow text-signal">Nocľah cestou</p>
+            <Pencil size={13} className="shrink-0 text-signal" />
+          </div>
+          <p className="mt-0.5 font-semibold leading-snug">
+            {austriaStay && austriaStay.status !== 'nevybrane' && austriaStay.name
+              ? austriaStay.name
+              : overnightWaypoint.name}
+          </p>
+          <p className="mt-0.5 text-sm text-muted">
+            {austriaStay && austriaStay.status !== 'nevybrane' && austriaStay.address
+              ? austriaStay.address
+              : overnightWaypoint.note}
+          </p>
+          {austriaStay?.status === 'nevybrane' ? (
+            <p className="mt-1 text-xs text-signal">Klikni sem a doplň, kedy a kam presne ideme</p>
+          ) : null}
+        </button>
       ) : null}
 
       <div className="relative mx-4 h-[46vh] min-h-[280px] overflow-hidden rounded-card border border-line">
@@ -349,6 +401,54 @@ export default function MapaPage() {
             {selectedPoi.note ? <p className="text-sm text-muted">{selectedPoi.note}</p> : null}
           </div>
         ) : null}
+      </Sheet>
+
+      <Sheet open={editingGraz} onClose={() => setEditingGraz(false)} title="Nocľah v Rakúsku">
+        <div className="space-y-4">
+          <TextField
+            label="Kde (názov ubytovania)"
+            value={grazDraft.name}
+            onChange={(e) => setGrazDraft((d) => ({ ...d, name: e.target.value }))}
+            placeholder="napr. Hotel Weitzer, Graz"
+          />
+          <TextField
+            label="Presná adresa"
+            value={grazDraft.address}
+            onChange={(e) => setGrazDraft((d) => ({ ...d, address: e.target.value }))}
+            placeholder="Ulica, mesto, Rakúsko"
+          />
+          <TextField
+            label="Kedy prichádzame"
+            value={grazDraft.checkIn}
+            onChange={(e) => setGrazDraft((d) => ({ ...d, checkIn: e.target.value }))}
+            placeholder="napr. 22. 8. 2026 popoludní"
+          />
+          <TextAreaField
+            label="Poznámka"
+            value={grazDraft.notes}
+            onChange={(e) => setGrazDraft((d) => ({ ...d, notes: e.target.value }))}
+            placeholder="parkovanie, kontakt, čokoľvek si treba zapamätať"
+          />
+          <Button
+            full
+            onClick={() => {
+              setAccommodation('acc-austria', {
+                name: grazDraft.name.trim() || undefined,
+                address: grazDraft.address.trim() || undefined,
+                checkIn: grazDraft.checkIn.trim() || undefined,
+                notes: grazDraft.notes.trim() || undefined,
+                status: grazDraft.name.trim() || grazDraft.address.trim() ? 'potvrdene' : 'nevybrane',
+              });
+              setEditingGraz(false);
+            }}
+          >
+            Uložiť
+          </Button>
+          <p className="text-xs text-muted">
+            Adresu potom appka použije aj ako cieľ v tlačidle &quot;Otvoriť v Google Maps&quot; pre
+            cestu späť.
+          </p>
+        </div>
       </Sheet>
     </main>
   );
