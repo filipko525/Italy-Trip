@@ -108,15 +108,15 @@ export default function MapaPage() {
             openFullRouteInGoogleMaps(
               originAddress,
               destinationAddress,
-              all.map((p) => p.coords),
+              route.segments[0].waypoints.slice(1, -1).map((wp) => wp.coords),
             )
           }
         >
           Otvoriť v Google Maps
         </Button>
         <p className="mt-1.5 px-1 text-xs text-muted">
-          Spustí sa appka Google Maps s celou trasou ({route.name}) aj so zastávkami z tejto
-          obrazovky. Ak appku nemáš, otvorí sa webová verzia.
+          Spustí sa appka Google Maps s presne tvojou naplánovanou trasou ({route.name}). Ak appku
+          nemáš, otvorí sa webová verzia.
         </p>
       </div>
 
