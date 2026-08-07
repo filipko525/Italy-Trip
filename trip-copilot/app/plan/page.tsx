@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone } from 'lucide-react';
+import { MapPin, Phone } from 'lucide-react';
 import { AppHeader } from '@/components/navigation/AppHeader';
 import { Timeline } from '@/components/trip/Timeline';
 import { ChecklistBlock } from '@/components/trip/ChecklistBlock';
@@ -17,6 +17,7 @@ import { CHECKLISTS, CONTACTS } from '@/data/checklists';
 import { DOCUMENTS } from '@/data/documents';
 import { TOLLS } from '@/data/tolls';
 import { BUDGET, CAR } from '@/data/trip';
+import { GRAZ_TIPS, TALIANSKO_TIPS, type DiscoverTip } from '@/data/discover';
 import { useAppState } from '@/lib/storage/app-state';
 import { formatMinutes } from '@/lib/calculations/geo';
 import { computeFuelStats, FUEL_RESERVE_WARNING } from '@/lib/calculations/fuel';
@@ -183,7 +184,41 @@ export default function PlanPage() {
             })}
           </ul>
         </Collapsible>
+
+        <Collapsible title="Tipy v Grazi" summary="Čo pozrieť pri nocľahu cestou späť">
+          <DiscoverList tips={GRAZ_TIPS} />
+        </Collapsible>
+
+        <Collapsible title="Tipy v Taliansku" summary="Výlety autom z Lignana">
+          <DiscoverList tips={TALIANSKO_TIPS} />
+        </Collapsible>
       </div>
     </main>
+  );
+}
+
+function DiscoverList({ tips }: { tips: DiscoverTip[] }) {
+  return (
+    <ul className="divide-y divide-line/60">
+      {tips.map((tip) => (
+        <li key={tip.id} className="py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium">{tip.name}</p>
+              <p className="eyebrow mt-0.5">{tip.category}</p>
+            </div>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tip.mapsQuery)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-pill bg-raised/60 px-3 py-2 text-xs font-medium"
+            >
+              <MapPin size={13} /> mapa
+            </a>
+          </div>
+          <p className="mt-1.5 text-sm text-muted">{tip.note}</p>
+        </li>
+      ))}
+    </ul>
   );
 }
