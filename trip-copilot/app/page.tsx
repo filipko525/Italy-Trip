@@ -39,8 +39,11 @@ export default function HomePage() {
     if (!state.travel.active && state.settings.direction !== 'tam') {
       setSettings({ direction: 'tam' });
     }
+    // Zámerne bez state.travel/setSettings v deps – reaguje len na zmenu smeru
+    // (napr. po tom, čo sa stav dotiahne z localStorage po prvom vykreslení),
+    // nech nevzniká nekonečná slučka.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [state.settings.direction]);
 
   const days = daysUntil(TRIP.departureDate);
   const lignano = ACCOMMODATIONS[0];
