@@ -139,23 +139,6 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     directions: ['tam'],
   }),
 
-  /* --- Rakúsko: Arnoldstein, posledná zastávka pred hranicou --- */
-  poi({
-    id: 'at-arnoldstein',
-    name: 'ASFINAG Raststation Dreiländereck',
-    category: 'odpocivadlo',
-    region: 'Arnoldstein',
-    country: 'AT',
-    coords: [13.6968706, 46.5708639],
-    detourMinutes: 0,
-    stopMinutes: 15,
-    catFriendly: true,
-    shade: true,
-    quiet: true,
-    openingHours: 'nonstop',
-    note: 'Posledná rakúska zastávka pred vstupom do Talianska. Pokojné miesto pri rieke, podľa recenzií bezpečná a čisté.',
-  }),
-
   /* --- Taliansko: Roccolo pri Pagnacco, posledná zastávka pred Lignanom (len cesta tam) --- */
   poi({
     id: 'it-pagnacco',
