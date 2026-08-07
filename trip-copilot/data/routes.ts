@@ -4,14 +4,12 @@ import { haversineKm } from '@/lib/calculations/geo';
 /* =========================================================
    TRASY
    ---------------------------------------------------------
-   Hlavné body (Trnava, Jurki Kopčianska, Alte Reichsstraße/
+   Body sú PRESNE tie, ktoré si vyklikal v Google Maps – žiadne
+   ďalšie mestá ani "spájacie" body nie sú pridané. Cesta tam má
+   presne 7 bodov (Trnava, Jurki Kopčianska, Alte Reichsstraße/
    Semmering, M-Rast Zeltweg, ASFINAG Wörthersee, Roccolo/
-   Pagnacco, Lignano; pri ceste späť aj Cardillo Vincenzo a
-   Techelsberg am Wörthersee) sú prevzaté priamo z reálnej,
-   používateľom naplánovanej Google Maps trasy – nie sú to
-   naše odhady. Medzi nimi sú len ľahké spájacie body pre
-   plynulejšiu čiaru na mape, nie o presnú geometriu z
-   Directions API. Slúži na:
+   Pagnacco, Lignano), prvý deň cesty späť presne 4 (Lignano,
+   Cardillo Vincenzo, Techelsberg am Wörthersee, Graz). Slúži na:
      • zákres trasy do mapy,
      • výpočet poradia bodov na trase (čo je pred nami),
      • odhad vzdialenosti od trasy.
@@ -33,16 +31,9 @@ interface PointDef {
 const TAM_POINTS: PointDef[] = [
   { coords: [17.6057394, 48.3887804], country: 'SK', name: 'Trnava', note: 'Štart – 15. 8. 2026 (Priečna 4)' },
   { coords: [17.0932238, 48.1097319], country: 'SK', name: 'Jurki Kopčianska', note: 'Čerpacia stanica pred hranicou' },
-  { coords: [17.0, 48.03], country: 'AT', name: 'Kittsee – hranica', note: 'Prechod SK → AT', border: true },
-  { coords: [16.1878412, 47.7471286], country: 'AT', name: 'Wiener Neustadt', note: 'Napojenie na S6' },
   { coords: [15.802547, 47.6236802], country: 'AT', name: 'Alte Reichsstraße (Semmering)', note: 'Vyhliadka na starej ceste cez Semmering' },
-  { coords: [14.7221784, 47.1941492], country: 'AT', name: 'M-Rast Zeltweg', note: 'Odpočívadlo, S36 obchádza Graz' },
-  { coords: [14.3661, 46.7686], country: 'AT', name: 'St. Veit an der Glan', note: 'Koniec S37, napojenie na A2' },
-  { coords: [14.305, 46.6247], country: 'AT', name: 'Klagenfurt', note: 'Hlavné mesto Korutánska, diaľničný uzol A2' },
+  { coords: [14.7221784, 47.1941492], country: 'AT', name: 'M-Rast Zeltweg', note: 'Odpočívadlo' },
   { coords: [14.0950087, 46.6297031], country: 'AT', name: 'ASFINAG Wörthersee', note: 'Výhľad na jazero' },
-  { coords: [13.8558, 46.6103], country: 'AT', name: 'Villach', note: 'Križovatka A2 / A10' },
-  { coords: [13.7083, 46.5475], country: 'AT', name: 'Arnoldstein', note: 'Posledné rakúske mesto pred hranicou' },
-  { coords: [13.58, 46.505], country: 'IT', name: 'Tarvisio – hranica', note: 'Prechod AT → IT, vstup na talianske mýto', border: true },
   { coords: [13.1869931, 46.1327421], country: 'IT', name: 'Roccolo (Pagnacco)', note: 'Posledná zastávka pred Lignanom' },
   { coords: [13.1448582, 45.6967665], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Yachting Residence' },
 ];
@@ -50,10 +41,7 @@ const TAM_POINTS: PointDef[] = [
 const SPAT_1_POINTS: PointDef[] = [
   { coords: [13.1448582, 45.6967665], country: 'IT', name: 'Lignano Sabbiadoro', note: 'Checkout 22. 8. 2026 o 9:00' },
   { coords: [13.139766, 45.6900363], country: 'IT', name: 'Cardillo Vincenzo', note: 'Tankovanie pred odchodom' },
-  { coords: [13.58, 46.505], country: 'IT', name: 'Tarvisio – hranica', note: 'Prechod IT → AT', border: true },
-  { coords: [13.8558, 46.6103], country: 'AT', name: 'Villach', note: 'Križovatka A2 / A10' },
   { coords: [14.0953451, 46.6296179], country: 'AT', name: 'Techelsberg am Wörthersee', note: 'Odpočinok pri jazere' },
-  { coords: [14.305, 46.6247], country: 'AT', name: 'Klagenfurt', note: 'Hlavné mesto Korutánska, diaľničný uzol A2' },
   { coords: [15.4417305, 47.0678961], country: 'AT', name: 'Graz alebo okolie', note: 'Nocľah 22. – 23. 8. 2026' },
 ];
 
@@ -119,7 +107,7 @@ export const CESTA_TAM: Route = (() => {
       distanceKm: 659,
       drivingMinutes: 442,
       description:
-        'Trnava → Jurki Kopčianska (Bratislava) → Wiener Neustadt → Semmering (Alte Reichsstraße) → M-Rast Zeltweg → St. Veit → Klagenfurt → ASFINAG Wörthersee → Villach → Arnoldstein → Tarvisio → Roccolo (Pagnacco) → Lignano. Reálna trasa naplánovaná v Google Maps, nevedie cez Slovinsko.',
+        'Trnava (Priečna 4) → Jurki Kopčianska (Bratislava) → Alte Reichsstraße (Semmering) → M-Rast Zeltweg → ASFINAG Wörthersee → Roccolo (Pagnacco) → Lignano. Presne tvoja naplánovaná trasa v Google Maps, nevedie cez Slovinsko.',
     },
     TAM_POINTS,
   );
@@ -149,7 +137,7 @@ export const CESTA_SPAT: Route = (() => {
       distanceKm: 368,
       drivingMinutes: 246,
       description:
-        'Checkout o 9:00, tankovanie v Lignane, prejazd cez Tarvisio, Villach a Techelsberg am Wörthersee do okolia Grazu na jednu noc. Reálna trasa naplánovaná v Google Maps.',
+        'Checkout o 9:00, tankovanie v Lignane (Cardillo Vincenzo), Techelsberg am Wörthersee, do okolia Grazu na jednu noc. Presne tvoja naplánovaná trasa v Google Maps.',
     },
     SPAT_1_POINTS,
   );
