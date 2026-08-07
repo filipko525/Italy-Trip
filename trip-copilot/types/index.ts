@@ -65,7 +65,8 @@ export type PoiCategory =
   | 'nakup'
   | 'veterina'
   | 'pet'
-  | 'pokoj';
+  | 'pokoj'
+  | 'noclah';
 
 export interface PointOfInterest {
   id: string;
