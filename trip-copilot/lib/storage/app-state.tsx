@@ -63,6 +63,10 @@ export const INITIAL_STATE: AppState = {
 interface AppStateContextValue {
   state: AppState;
   ready: boolean;
+  /** True, ak appka pri načítaní zistila zabudnutý cestovný režim bežiaci
+      viac než MAX_TRAVEL_HOURS a sama ho vypla. */
+  autoStoppedTravel: boolean;
+  dismissAutoStoppedTravel: () => void;
   update: (updater: (prev: AppState) => AppState) => void;
   reset: () => void;
 
@@ -94,38 +98,57 @@ const AppStateContext = createContext<AppStateContextValue | null>(null);
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-function loadState(): AppState {
-  if (typeof window === 'undefined') return INITIAL_STATE;
+/** Ak niekto zabudne ukončiť jazdu, cestovný režim sa po tomto počte hodín
+    sám vypne – nech appka nebeží donekonečna na pozadí (napr. cez noc). */
+const MAX_TRAVEL_HOURS = 10;
+
+function loadState(): { state: AppState; autoStoppedTravel: boolean } {
+  if (typeof window === 'undefined') return { state: INITIAL_STATE, autoStoppedTravel: false };
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return INITIAL_STATE;
+    if (!raw) return { state: INITIAL_STATE, autoStoppedTravel: false };
     const parsed = JSON.parse(raw) as AppState;
-    if (parsed.version !== STATE_VERSION) return INITIAL_STATE;
+    if (parsed.version !== STATE_VERSION) return { state: INITIAL_STATE, autoStoppedTravel: false };
+    let travel = { ...INITIAL_STATE.travel, ...parsed.travel };
+    let autoStoppedTravel = false;
+    if (travel.active && travel.startedAt) {
+      const hoursElapsed = (Date.now() - new Date(travel.startedAt).getTime()) / (1000 * 60 * 60);
+      if (hoursElapsed > MAX_TRAVEL_HOURS) {
+        travel = { active: false, status: 'jazda' };
+        autoStoppedTravel = true;
+      }
+    }
     return {
-      ...INITIAL_STATE,
-      ...parsed,
-      settings: { ...INITIAL_STATE.settings, ...parsed.settings },
-      petLog: { ...INITIAL_STATE.petLog, ...parsed.petLog },
-      travel: { ...INITIAL_STATE.travel, ...parsed.travel },
-      planOverrides: { ...INITIAL_STATE.planOverrides, ...parsed.planOverrides },
-      petProfileOverrides: { ...INITIAL_STATE.petProfileOverrides, ...parsed.petProfileOverrides },
-      insuranceOverrides: { ...INITIAL_STATE.insuranceOverrides, ...parsed.insuranceOverrides },
-      accommodationOverrides: {
-        ...INITIAL_STATE.accommodationOverrides,
-        ...parsed.accommodationOverrides,
+      state: {
+        ...INITIAL_STATE,
+        ...parsed,
+        settings: { ...INITIAL_STATE.settings, ...parsed.settings },
+        petLog: { ...INITIAL_STATE.petLog, ...parsed.petLog },
+        travel,
+        planOverrides: { ...INITIAL_STATE.planOverrides, ...parsed.planOverrides },
+        petProfileOverrides: { ...INITIAL_STATE.petProfileOverrides, ...parsed.petProfileOverrides },
+        insuranceOverrides: { ...INITIAL_STATE.insuranceOverrides, ...parsed.insuranceOverrides },
+        accommodationOverrides: {
+          ...INITIAL_STATE.accommodationOverrides,
+          ...parsed.accommodationOverrides,
+        },
       },
+      autoStoppedTravel,
     };
   } catch {
-    return INITIAL_STATE;
+    return { state: INITIAL_STATE, autoStoppedTravel: false };
   }
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
   const [ready, setReady] = useState(false);
+  const [autoStoppedTravel, setAutoStoppedTravel] = useState(false);
 
   useEffect(() => {
-    setState(loadState());
+    const loaded = loadState();
+    setState(loaded.state);
+    setAutoStoppedTravel(loaded.autoStoppedTravel);
     setReady(true);
   }, []);
 
@@ -146,6 +169,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return {
       state,
       ready,
+      autoStoppedTravel,
+      dismissAutoStoppedTravel: () => setAutoStoppedTravel(false),
       update,
       reset: () => setState(INITIAL_STATE),
 
@@ -304,7 +329,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
             : { ...prev, shownFactoidIds: [...prev.shownFactoidIds, id] },
         ),
     };
-  }, [state, ready, update]);
+  }, [state, ready, autoStoppedTravel, update]);
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }
