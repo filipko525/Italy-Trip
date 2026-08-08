@@ -50,6 +50,7 @@ export const INITIAL_STATE: AppState = {
   tolls: {},
   savedPoiIds: [],
   visitedPoiIds: [],
+  shownFactoidIds: [],
   petLog: { notes: '' },
   travel: { active: false, status: 'jazda' },
   accommodationNotes: {},
@@ -86,6 +87,7 @@ interface AppStateContextValue {
   setPetProfile: (patch: Partial<AppState['petProfileOverrides']>) => void;
   setInsurance: (patch: Partial<AppState['insuranceOverrides']>) => void;
   setAccommodation: (id: string, patch: AppState['accommodationOverrides'][string]) => void;
+  markFactoidShown: (id: string) => void;
 }
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -294,6 +296,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
             [id]: { ...prev.accommodationOverrides[id], ...patch },
           },
         })),
+
+      markFactoidShown: (id) =>
+        update((prev) =>
+          prev.shownFactoidIds.includes(id)
+            ? prev
+            : { ...prev, shownFactoidIds: [...prev.shownFactoidIds, id] },
+        ),
     };
   }, [state, ready, update]);
 
