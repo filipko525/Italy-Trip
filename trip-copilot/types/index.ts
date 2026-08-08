@@ -339,6 +339,8 @@ export interface AppState {
   tolls: Record<string, { purchased: boolean; priceEur?: number; note?: string }>;
   savedPoiIds: string[];
   visitedPoiIds: string[];
+  /** ID zaujímavostí (Factoid), ktoré appka už počas jazdy ukázala. */
+  shownFactoidIds: string[];
   petLog: PetLog;
   travel: TravelState;
   accommodationNotes: Record<string, string>;
