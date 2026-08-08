@@ -177,6 +177,20 @@ export default function HomePage() {
           />
         </div>
 
+        <Link
+          href="/hra"
+          className="flex items-center gap-3 rounded-card border border-signal/30 bg-signal/10 p-4"
+        >
+          <span className="text-3xl">🇮🇹</span>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold leading-snug">Prežiješ dovolenku v Taliansku?</p>
+            <p className="mt-0.5 text-xs text-muted">
+              Minihra pre chvíle nudy v aute – slovíčka, kvízy aj Sumi bonus
+            </p>
+          </div>
+          <span className="shrink-0 text-sm font-medium text-signal">Hrať →</span>
+        </Link>
+
         <p className="px-1 pb-2 text-xs leading-relaxed text-muted">
           Body záujmu v aplikácii sú zatiaľ testovacie dáta. Navigáciu preberá Google Maps alebo
           Waze – táto aplikácia je copilot, nie navigácia. Vodič ju neovláda počas jazdy.
