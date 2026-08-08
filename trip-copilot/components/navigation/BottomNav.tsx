@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Navigation2, CalendarDays, Wallet, Cat, ShieldCheck } from 'lucide-react';
+import { Map, Navigation2, CalendarDays, Wallet, Cat, ListChecks } from 'lucide-react';
 
 const ITEMS = [
   { href: '/mapa', label: 'Mapa', Icon: Map },
@@ -10,7 +10,7 @@ const ITEMS = [
   { href: '/plan', label: 'Plán', Icon: CalendarDays },
   { href: '/naklady', label: 'Náklady', Icon: Wallet },
   { href: '/sumi', label: 'Sumi', Icon: Cat },
-  { href: '/poistenie', label: 'Poistenie', Icon: ShieldCheck },
+  { href: '/checklisty', label: 'Checklisty', Icon: ListChecks },
 ];
 
 export function BottomNav() {
