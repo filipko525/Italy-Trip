@@ -12,6 +12,7 @@ import {
   Play,
   Route as RouteIcon,
   Ticket,
+  TriangleAlert,
 } from 'lucide-react';
 import { CESTA_TAM } from '@/data/routes';
 import { ACCOMMODATIONS } from '@/data/accommodations';
@@ -30,7 +31,7 @@ import { Tag } from '@/components/ui/Chip';
 
 export default function HomePage() {
   const router = useRouter();
-  const { state, setTravel, setSettings } = useAppState();
+  const { state, setTravel, setSettings, autoStoppedTravel, dismissAutoStoppedTravel } = useAppState();
   const position = useTripPosition();
 
   // Cesta tam má byť vždy prioritná pri otvorení appky – ak nie sme práve
@@ -99,6 +100,26 @@ export default function HomePage() {
       </section>
 
       <div className="space-y-4 px-4 py-5">
+        {autoStoppedTravel ? (
+          <div className="flex items-start gap-3 rounded-card bg-signal/12 p-4">
+            <TriangleAlert size={20} className="mt-0.5 shrink-0 text-signal" />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-signal">Cestovný režim sa sám vypol</p>
+              <p className="mt-0.5 text-sm text-muted">
+                Bežal viac než 10 hodín bez ukončenia (asi ste zabudli zastaviť jazdu), tak sme ho
+                pre istotu vypli sami.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={dismissAutoStoppedTravel}
+              className="shrink-0 text-sm font-medium text-signal underline"
+            >
+              OK
+            </button>
+          </div>
+        ) : null}
+
         <Card className="p-4">
           <div className="mb-3 flex items-baseline justify-between">
             <p className="eyebrow">Cesta tam</p>
