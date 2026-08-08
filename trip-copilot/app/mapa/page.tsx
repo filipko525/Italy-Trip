@@ -5,6 +5,7 @@ import {
   Cat,
   Clock,
   CornerUpRight,
+  Lightbulb,
   LocateFixed,
   MapPin,
   Navigation,
@@ -27,6 +28,7 @@ import { openFullRouteInGoogleMaps } from '@/lib/geolocation/navigation-links';
 import { formatKm, formatMinutes } from '@/lib/calculations/geo';
 import { POI_CATEGORY_LABELS } from '@/data/poi';
 import { ACCOMMODATIONS } from '@/data/accommodations';
+import { FACTOIDS } from '@/data/factoids';
 import type { PoiWithGeoContext } from '@/types';
 
 /** Presné adresy pre Google Maps odkaz – nie súradnice z našej zjednodušenej
@@ -38,13 +40,14 @@ const LIGNANO_ADDRESS = 'Viale Italia 70, 33054 Lignano Sabbiadoro, Taliansko';
 const GRAZ_ADDRESS = 'Graz, Rakúsko';
 
 export default function MapaPage() {
-  const { state, setSettings, setTravel, setAccommodation } = useAppState();
+  const { state, setSettings, setTravel, setAccommodation, markFactoidShown } = useAppState();
   const { position, all } = usePoisAhead();
   const [dark, setDark] = useState(false);
   const [online, setOnline] = useState(true);
   const [selectedPoi, setSelectedPoi] = useState<PoiWithGeoContext | null>(null);
   const [editingGraz, setEditingGraz] = useState(false);
   const [grazDraft, setGrazDraft] = useState({ name: '', address: '', phone: '', checkIn: '', notes: '' });
+  const [activeFactoid, setActiveFactoid] = useState<(typeof FACTOIDS)[number] | null>(null);
   const nextStop = all.find((p) => p.isAhead && !state.visitedPoiIds.includes(p.id)) ?? null;
 
   const austriaBase = ACCOMMODATIONS.find((a) => a.id === 'acc-austria');
@@ -75,6 +78,25 @@ export default function MapaPage() {
     () => ({ route: position.route, direction: state.settings.direction }),
     [position.route, state.settings.direction],
   );
+
+  // Zaujímavosti počas jazdy – keď auto prejde kilometer, na ktorý je fakt
+  // naviazaný, ukážeme ho raz (v oboch smeroch). Kontrolujeme len počas
+  // aktívneho cestovného režimu, nech to nevyskakuje pri bezcieľnom
+  // prezeraní appky doma.
+  useEffect(() => {
+    if (!state.travel.active) return;
+    const candidate = FACTOIDS.find(
+      (f) =>
+        f.direction === direction &&
+        position.progressKm >= f.triggerKm &&
+        !state.shownFactoidIds.includes(f.id),
+    );
+    if (candidate && !activeFactoid) {
+      setActiveFactoid(candidate);
+      markFactoidShown(candidate.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [position.progressKm, direction, state.travel.active]);
 
   /** Cesta späť má zatiaľ naplánovaný a overený len prvý deň (do Grazu na nocľah) –
       úsek Graz → domov ešte nie je finálny. Ako cieľ v Google Maps použijeme skutočnú
@@ -457,6 +479,26 @@ export default function MapaPage() {
             cestu späť, telefón sa zobrazí aj v Dôležitých kontaktoch na Pláne.
           </p>
         </div>
+      </Sheet>
+
+      <Sheet
+        open={activeFactoid !== null}
+        onClose={() => setActiveFactoid(null)}
+        title={activeFactoid?.place ?? ''}
+      >
+        {activeFactoid ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sea">
+              <Lightbulb size={18} />
+              <p className="eyebrow text-sea">Vedeli ste, že...</p>
+            </div>
+            <p className="text-lg font-semibold leading-snug">{activeFactoid.title}</p>
+            <p className="text-sm leading-relaxed text-muted">{activeFactoid.text}</p>
+            <Button full variant="secondary" onClick={() => setActiveFactoid(null)}>
+              Pokračovať v jazde
+            </Button>
+          </div>
+        ) : null}
       </Sheet>
     </main>
   );
